@@ -19,7 +19,7 @@
   <div class="container">
   <ul class="nav nav-tabs">
     <li class="{% if nav_index %}active{% endif %}"><a href="{{ url_for('index') }}">Главная</a></li>
-    <li class="{% if nav_status %}active{% endif %}"><a href="{{ url_for('status') }}">Статус</a></li>
+    <li class="{% if nav_src %}active{% endif %}"><a href="{{ url_for('src') }}">Исходные коды</a></li>
     <li class="{% if nav_crontab %}active{% endif %}"><a href="{{ url_for('crontab') }}">Crontab</a></li>
   </ul>
     {% block content %}{% endblock %}
