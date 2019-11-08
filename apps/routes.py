@@ -8,7 +8,7 @@ from apps import app
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html', index=True)
+    return render_template('index.html')
 
 
 @app.route('/status')
@@ -24,12 +24,12 @@ def status():
                       r'(?P<user>.*?) (?P<state>\w+) \s+ (?P<submit>.*?) '
                       r'(?P<startat>.*?) (?P<queue>.*?) ')
     ret = comp.findall(p.stdout.read())
-    return render_template('status.html', content=ret, status=True)
+    return render_template('status.html', content=ret)
 
 
 @app.route('/crontab')
 def crontab():
-    return render_template('crontab.html', crontab=True)
+    return render_template('crontab.html')
 
 
 @app.route('/src')
@@ -41,7 +41,7 @@ def src():
             filelist[i] = filename
             i += 1
 
-    return render_template('source.html', filelist=filelist, source=True)
+    return render_template('source.html', filelist=filelist)
 
 
 @app.route('/src/<path:filename>')
