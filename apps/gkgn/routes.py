@@ -33,4 +33,6 @@ def index_gkgn():
                      region=request.values['region'])
             length = result.count()
 
-    return render_template('gkgn/index.html', result=result, len=length)
+    template = 'gkgn/result.html' if request.is_xhr else 'gkgn/index.html'
+
+    return render_template(template, result=result, len=length)

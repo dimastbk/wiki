@@ -35,36 +35,11 @@
 		</div>
 	</div>
 </form>
-{% if result %}
-	<p>Всего найдено записей: {{ len }}</p>
-	<table class="table table-condensed">
-		<thead>
-			<tr>
-				<th>Код в ГКГН</th>
-				<th>Наименование</th>
-				<th>Тип</th>
-				<th>Субъект РФ</th>
-				<th>Район</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for key in result %}
-				<tr>
-					<th>{{ key.gkgn_id }}</th>
-					<td>
-						{% if key.types == 'район' %}
-							<a href="{{ url_for('gkgn.index_gkgn', region=key.region, district='{} район'.format(key.name)) }}">{{ key.name }}</a>
-						{% else %}
-							{{ key.name }}
-						{% endif %}
-					</td>
-					<td>{{ key.types }}</td>
-					<td>{% if key.region %}<a href="{{ url_for('gkgn.index_gkgn', region=key.region) }}">{{ key.region }}</a>{% endif %}</td>
-					<td>{% if key.district %}<a href="{{ url_for('gkgn.index_gkgn', region=key.region, district=key.district) }}">{{ key.district }}</a>{% endif %}</td>
-				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-	
-{% endif %}
+<div id="response">
+	{% include "gkgn/result.html" %}
+</div>
+{% endblock %}
+{% block extend_js %}
+	<script type="application/javascript" src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script type="application/javascript" src="{{ url_for('static', filename='js.js') }}"></script>
 {% endblock %}
