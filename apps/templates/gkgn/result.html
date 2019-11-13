@@ -4,26 +4,29 @@
 		<thead>
 			<tr>
 				<th>Код в ГКГН</th>
-				<th>Наименование</th>
+				<th>Наименование (ГКГН)</th>
 				<th>Тип</th>
 				<th>Субъект РФ</th>
 				<th>Район</th>
+				<th>Координаты</th>
+				<th>ОКТМО</th>
 			</tr>
 		</thead>
 		<tbody>
 			{% for key in result %}
 				<tr>
 					<th>{{ key.gkgn_id }}</th>
-					<td>
-						{% if key.types == 'район' %}
-							<a href="{{ url_for('gkgn.index_gkgn', region=key.region, district='{} район'.format(key.name)) }}">{{ key.name }}</a>
-						{% else %}
-							{{ key.name }}
+					<td>{% if key.district %}{{ key.name }}{% elif key.types in ['район', 'кожуун', 'эвенкийский нац.улус', 'улус (р-н)', 'адм. округ'] %}
+							<a href="{{ url_for('gkgn.index_gkgn', region=key.region, district='{} {}'.format(key.name, key.types)) }}">{{ key.name }}</a>
+						{% elif not key.district %}
+							<a href="{{ url_for('gkgn.index_gkgn', region=key.region, district='{} {}'.format(key.types, key.name)) }}">{{ key.name }}</a>
 						{% endif %}
 					</td>
 					<td>{{ key.types }}</td>
 					<td>{% if key.region %}<a href="{{ url_for('gkgn.index_gkgn', region=key.region) }}">{{ key.region }}</a>{% endif %}</td>
 					<td>{% if key.district %}<a href="{{ url_for('gkgn.index_gkgn', region=key.region, district=key.district) }}">{{ key.district }}</a>{% endif %}</td>
+					<td>{% if key.c_lat and key.c_lon %}<a target="_blank" href="//tools.wmflabs.org/geohack/geohack.php?language=ru&title={{ key.name }}&params={{ key.c_lat }}_N_{{ key.c_lon }}_E_scale:10000_region:RU_type:city">{{ '%0.4f'| format(key.c_lat|float) }}/{{ '%0.4f'| format(key.c_lon|float) }}</a>{% endif %}</td>
+					<td>{% if key.oktmo %}<a target="_blank" href="https://old.classif.gov.spb.ru/classificators/view/tma.php/?st=A&kr=1&kod={{ key.oktmo }}">{{ key.oktmo }}</a>{% endif %}</td>
 				</tr>
 			{% endfor %}
 		</tbody>
