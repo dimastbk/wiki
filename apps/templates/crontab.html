@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% set nav_crontab = True %}
 {% block content %}
-<pre>
+<pre style="margin-top: 1em;">
 {% include "crontab.txt" ignore missing %}
 </pre>
 {% endblock %}

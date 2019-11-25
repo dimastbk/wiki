@@ -12,18 +12,22 @@
     {% endif %}
 
     <!-- Bootstrap -->
-    <link href="//tools-static.wmflabs.org/static/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
 
   </head>
   <body>
-  <div class="container">
-  <ul class="nav nav-tabs">
-    <li class="{% if nav_index %}active{% endif %}"><a href="{{ url_for('index') }}">Главная</a></li>
-    <li class="{% if nav_gkgn %}active{% endif %}"><a href="{{ url_for('gkgn.index_gkgn') }}">ГКГН</a></li>
-    <li class="{% if nav_src %}active{% endif %}"><a href="{{ url_for('src') }}">Исходные коды</a></li>
-    <li class="{% if nav_crontab %}active{% endif %}"><a href="{{ url_for('crontab') }}">Crontab</a></li>
-  </ul>
-    {% block content %}{% endblock %}
+  <div class="container-fluid">
+    <div class="row" style="padding-top: 1em;">
+      <ul class="nav nav-tabs col-md-10 col-md-offset-1">
+        <li class="{% if nav_index %}active{% endif %}"><a href="{{ url_for('index') }}">Главная</a></li>
+        <li class="{% if nav_gkgn %}active{% endif %}"><a href="{{ url_for('gkgn.index_gkgn') }}">ГКГН</a></li>
+        <li class="{% if nav_src %}active{% endif %}"><a href="{{ url_for('src') }}">Исходные коды</a></li>
+        <li class="{% if nav_crontab %}active{% endif %}"><a href="{{ url_for('crontab') }}">Crontab</a></li>
+      </ul>
+      <div class="col-md-10 col-md-offset-1">
+        {% block content %}{% endblock %}
+      </div>
+    </div>
   </div>
   {% block extend_js %}{% endblock %}
   </body>

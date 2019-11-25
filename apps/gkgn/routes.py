@@ -20,7 +20,8 @@ def index_gkgn():
 
         elif 'district' in request.values and request.values['district']:
             result = Settlement.query.filter_by(
-                     district=request.values['district'])
+                district=request.values['district'],
+            )
 
             # Проверяем регион, потому что есть одноимённые районы
             if 'region' in request.values and request.values['region']:
@@ -30,9 +31,8 @@ def index_gkgn():
 
         elif 'region' in request.values and request.values['region']:
             result = Settlement.query.filter_by(
-                     region=request.values['region'])
+                region=request.values['region'],
+            )
             length = result.count()
 
-    template = 'gkgn/result.html' if request.is_xhr else 'gkgn/index.html'
-
-    return render_template(template, result=result, len=length)
+    return render_template('gkgn/index.html', result=result, len=length)

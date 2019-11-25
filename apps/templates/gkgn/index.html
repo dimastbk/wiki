@@ -35,11 +35,6 @@
 		</div>
 	</div>
 </form>
-<div id="response">
-	{% include "gkgn/result.html" %}
-</div>
+{% include "gkgn/result.html" %}
 {% endblock %}
-{% block extend_js %}
-	<script type="application/javascript" src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-	<script type="application/javascript" src="{{ url_for('static', filename='js.js') }}"></script>
-{% endblock %}
+{% block extend_js %}{% endblock %}
