@@ -3,21 +3,21 @@
 {% block content %}
 <form action="{{ url_for('gkgn.index_gkgn') }}" method="GET" class="form-horizontal" style="padding-top: 2em;">
 	<div class="form-group">
-		<label for="id" class="col-sm-2 control-label">Код ГКГН:</label>
+		<label for="gkgn_id" class="col-sm-2 control-label">Код ГКГН:</label>
 		<div class="col-sm-6">
-			<input name="id" id="id" class="form-control">
+			<input id="gkgn_id" name="gkgn_id" class="form-control" value="{{ form.gkgn_id }}">
 		</div>
 	</div>
 	<div class="form-group">
 		<label for="name" class="col-sm-2 control-label">Название объекта:</label>
 		<div class="col-sm-6">
-			<input name="name" id="name" class="form-control">
+			<input id="name" name="name" class="form-control" value="{{ form.name }}">
 		</div>
 	</div>
 	<div class="form-group">
 		<label for="region" class="col-sm-2 control-label">Регион:</label>
 		<div class="col-sm-6">
-			<select class="form-control" id="region" name="region">
+			<select id="region" name="region" class="form-control">
 				<!-- Сделать получение из базы? -->
 				{% include "gkgn/regions.html" %}
 			</select>
@@ -26,7 +26,7 @@
 	<div class="form-group">
 		<label for="district" class="col-sm-2 control-label">Район:</label>
 		<div class="col-sm-6">
-			<input name="district" id="district" class="form-control">
+			<input id="district" name="district" class="form-control" value="{{ form.district }}">
 		</div>
 	</div>
 	<div class="form-group">

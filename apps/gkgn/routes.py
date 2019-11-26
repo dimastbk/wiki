@@ -4,35 +4,25 @@ from apps.gkgn import bp
 
 from .models import Settlement
 
-
 @bp.route('/')
 def index_gkgn():
-    result = ''
+
     length = ''
+    resp = ''
+    form = {}
+
+    for key in ('gkgn_id', 'name', 'district', 'region'):
+        form[key] = request.values[key] if (key in request.values
+                                            and request.values[key]) else ''
+
     if request.values:
-        if 'id' in request.values and request.values['id']:
-            result = Settlement.query.filter_by(gkgn_id=request.values['id'])
-            length = result.count()
+        query = {key: value for key, value in form.items() if value != ''}
+        resp = Settlement.query.filter_by(**query)
+        length = resp.count()
 
-        elif 'name' in request.values and request.values['name']:
-            result = Settlement.query.filter_by(name=request.values['name'])
-            length = result.count()
-
-        elif 'district' in request.values and request.values['district']:
-            result = Settlement.query.filter_by(
-                district=request.values['district'],
-            )
-
-            # Проверяем регион, потому что есть одноимённые районы
-            if 'region' in request.values and request.values['region']:
-                result = result.filter_by(region=request.values['region'])
-
-            length = result.count()
-
-        elif 'region' in request.values and request.values['region']:
-            result = Settlement.query.filter_by(
-                region=request.values['region'],
-            )
-            length = result.count()
-
-    return render_template('gkgn/index.html', result=result, len=length)
+    return render_template(
+        'gkgn/index.html',
+        result=resp or '',
+        len=length or '',
+        form=form,
+    )
