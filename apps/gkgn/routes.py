@@ -4,6 +4,7 @@ from apps.gkgn import bp
 
 from .models import Settlement
 
+
 @bp.route('/')
 def index_gkgn():
 

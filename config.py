@@ -1,8 +1,8 @@
 import os
-import sys
-sys.path.append('/data/project/dimastbkbot')
 
-import replica
+from dotenv import find_dotenv, load_dotenv
+
+load_dotenv(find_dotenv())
 
 
 class Config(object):
@@ -10,9 +10,5 @@ class Config(object):
     SRC_DIR = 'src'
     SRC_PATH = os.path.join(BASE_DIR, SRC_DIR)
 
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}/s52323__GKGN'.format(
-                              replica.user,
-                              replica.password,
-                              replica.host
-                              )
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI', '')
     SQLALCHEMY_TRACK_MODIFICATIONS = False

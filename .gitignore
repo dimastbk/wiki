@@ -1,6 +1,3 @@
-# local config
-replica.py
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -112,6 +109,3 @@ venv.bak/
 #sublime
 *.sublime-project
 *.sublime-workspace
-
-#run.sh
-run.sh

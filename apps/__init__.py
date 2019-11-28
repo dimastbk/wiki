@@ -12,11 +12,11 @@ migrate = Migrate(app, db)
 
 
 # blueprints ГКГН
-from apps.gkgn import bp as gkgn_bp
+from apps.gkgn import bp as gkgn_bp     # noqa E402
 app.register_blueprint(gkgn_bp, url_prefix='/gkgn')
 
 
-from apps import routes
+from apps import routes                 # noqa E402, F401
 
 # импортируем модели, чтобы подхватить менеджером миграций
-from apps.gkgn.models import Settlement
+from apps.gkgn.models import Settlement # noqa F401
