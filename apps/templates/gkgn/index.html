@@ -1,5 +1,7 @@
 {% extends "base.html" %}
+
 {% set nav_gkgn = True %}
+
 {% block content %}
 <form action="{{ url_for('gkgn.index_gkgn') }}" method="GET" class="form-horizontal" style="padding-top: 2em;">
 	<div class="form-group">
@@ -35,6 +37,9 @@
 		</div>
 	</div>
 </form>
+
 {% include "gkgn/result.html" %}
+
 {% endblock %}
+
 {% block extend_js %}{% endblock %}

@@ -14,6 +14,8 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
 
+    {% block extend_css %}{% endblock %}
+
   </head>
   <body>
   <div class="container-fluid">
@@ -21,6 +23,7 @@
       <ul class="nav nav-tabs col-md-10 col-md-offset-1">
         <li class="{% if nav_index %}active{% endif %}"><a href="{{ url_for('index') }}">Главная</a></li>
         <li class="{% if nav_gkgn %}active{% endif %}"><a href="{{ url_for('gkgn.index_gkgn') }}">ГКГН</a></li>
+        <li class="{% if nav_coord %}active{% endif %}"><a href="{{ url_for('coord.index_coord') }}">Экспорт координат</a></li>
         <li class="{% if nav_src %}active{% endif %}"><a href="{{ url_for('src') }}">Исходные коды</a></li>
         <li class="{% if nav_crontab %}active{% endif %}"><a href="{{ url_for('crontab') }}">Crontab</a></li>
       </ul>

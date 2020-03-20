@@ -1,3 +1,11 @@
+[tool.isort]
+line_length = 100
+known_flask = "flask"
+sections = "FUTURE,STDLIB,FLASK,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+multi_line_output=3
+skip = "migrations,__init__.py"
+include_trailing_comma = true
+
 [tool.poetry]
 name = "dimastbkbot"
 version = "0.1.0"
@@ -11,14 +19,17 @@ Flask-Migrate = "^2.5"
 Flask-SQLAlchemy = "^2.4"
 PyMySQL = "^0.9.3"
 python-dotenv = "^0.10.3"
-pytest = "^5.3"
+
+gpxpy = "1.3.5"
+simplekml = "^1.3.3"
+python-slugify = "^4.0.0"
+geojson = "^2.5.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.7"
-flake8-isort = "^2.7"
 flake8-print = "^3.1"
 flake8-quotes = "^2.1"
-pytest = "^5.3"
+isort = {extras = ["pyproject"], version = "^4.3.21"}
 
 [build-system]
 requires = ["poetry>=0.12"]
