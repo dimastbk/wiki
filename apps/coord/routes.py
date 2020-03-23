@@ -11,6 +11,13 @@ from apps.coord import bp
 from .track_file import makegpx, makejson, makekml
 
 
+def get_project(project):
+    lang, pr = project.split('wiki')
+    if not pr:
+        pr = 'pedia'
+    return '{}.wiki{}.org'.format(lang, pr)
+
+
 @bp.route('/')
 def index_coord():
 
@@ -62,7 +69,12 @@ def index_coord():
         connection.close()
 
     if ext == 'map' or not points:
-        return render_template('coord/index.html', form=form, points=makejson(points, category))
+        return render_template(
+            'coord/index.html',
+            form=form,
+            points=makejson(points, category),
+            project=get_project(wiki),
+        )
 
     if ext in formats.keys():
         filename = slugify(category)
@@ -73,7 +85,9 @@ def index_coord():
             filename='{}.{}'.format(filename, formats[ext]['ext']),
         )
         response = Response(
-            formats[ext]['func'](points, category), headers=headers, content_type=formats[ext]['ct']
+            formats[ext]['func'](points, category, project=get_project(wiki)),
+            headers=headers,
+            content_type=formats[ext]['ct'],
         )
 
     return response

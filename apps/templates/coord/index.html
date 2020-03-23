@@ -18,11 +18,11 @@
 	</div>
 	<div class="form-group">
 		<label class="col-sm-2 control-label">Опции:</label>
-		<div class="checkbox col-sm-3">
+{# 		<div class="checkbox col-sm-3">
 			<label>
 				<input type="checkbox" name="recursive" id="recursive" {% if form.recursive %}checked{% endif %}>Рекурсивно
 			</label>
-		</div>
+		</div> #}
 		<div class="checkbox col-sm-3">
 			<label>
 				<input type="checkbox" name="not_primary" id="not_primary" {% if form.not_primary %}checked{% endif %}>Дополнительные координаты
@@ -45,7 +45,7 @@
 				GeoJSON
 			</label>
 			<label>
-				<input type="radio" name="ext" id="ext4" value="map"{% if form.ext == 'map' %}checked{% endif %}>
+				<input type="radio" name="ext" id="ext4" value="map" {% if form.ext == 'map' %}checked{% endif %}>
 				На карте
 			</label>
 		</div>
@@ -57,63 +57,91 @@
 	</div>
 </form>
 
-<div id="map" style="height: 500px;"></div>
+    {% if points %}
+        <div id="map" style="height: 500px;"></div>
+    {% endif %}
 {% endblock %}
 
 {% block extend_css %}
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
-  integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
-  crossorigin=""/>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/1.6.0/Control.FullScreen.css" integrity="sha256-RTALnHN76PJ32RJx2mxggy+RUt9TIRV+mfPLSLbI75A=" crossorigin="anonymous" />
+    {% if points %}
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+        crossorigin=""/>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/1.6.0/Control.FullScreen.css" integrity="sha256-RTALnHN76PJ32RJx2mxggy+RUt9TIRV+mfPLSLbI75A=" crossorigin="anonymous" />
+    {% endif %}
 {% endblock %}
 
 {% block extend_js %}
-  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
-  integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
-  crossorigin=""></script>
-  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/1.6.0/Control.FullScreen.min.js" integrity="sha256-6H5xWuqlbGtfk8UL9eMYmp14brCbCw1ZZialT8fHLRE=" crossorigin="anonymous"></script>
+    {% if points %}
+        <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+        integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+        crossorigin=""></script>
+        <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/1.6.0/Control.FullScreen.min.js" integrity="sha256-6H5xWuqlbGtfk8UL9eMYmp14brCbCw1ZZialT8fHLRE=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/leaflet-bing-layer@3.3.1/leaflet-bing-layer.min.js" integrity="sha256-WHBwQhbzjOM8oUYBk983WdI+159mgW5jmWkmux0/Iw0=" crossorigin="anonymous"></script>
 
-  <script type="text/javascript">
+        <script type="text/javascript">
 
-    var markerArray = [];
+            function desc_popup(feature) {
+              return '<div class="text-center"><h5><b>' + feature.properties.name + '</b></h5></div> \
+                      <div class="text-center"><b><a href="https://{{ project }}/wiki/' + feature.properties.title + '">Статья на Вики</a></b></div>'
+            }
 
-    var map = L.map('map', {
-	  fullscreenControl: true,
-	  fullscreenControlOptions: {
-	    position: 'topleft'
-	  }
-	});
+            var markerArray = [];
 
-	var place_arr = {{ points|safe }}
+        	var place_arr = {{ points|safe }};
+            var project = '{{ project }}';
 
-    var markers = L.markerClusterGroup({
-      showCoverageOnHover: false,
-      maxClusterRadius: 10
-    });
+            var markers = L.markerClusterGroup({
+              showCoverageOnHover: false,
+              maxClusterRadius: 20
+            });
 
-    L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
-	    attribution: 'Данные: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors \
-	    			  Статика: &copy; <a href="https://wikimediafoundation.org/w/index.php?title=Maps_Terms_of_Use#Where_does_the_map_data_come_from.3F">Wikimedia</a> contributors'
-	}).addTo(map);
+        	var BING_KEY = 'AuiwpGpSbqrZDMIRrrjvmMbAuDvD6FhM0jFArLqRUKEWEQExn8iMdsO9tz-c2wxu'
+        	var osm_layer = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
+        	    attribution: 'Data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors \
+        	    			  Tiles: &copy; <a href="https://wikimediafoundation.org/w/index.php?title=Maps_Terms_of_Use#Where_does_the_map_data_come_from.3F">Wikimedia</a> contributors'
+        	});
+        	var bing_aerial_layer = L.tileLayer.bing({
+        		bingMapsKey: BING_KEY,
+        		imagerySet: 'AerialWithLabelsOnDemand',
+        		culture: 'ru',
+        	});
+        	var bing_road_layer = L.tileLayer.bing({
+        		bingMapsKey: BING_KEY,
+        		imagerySet: 'RoadOnDemand',
+        		culture: 'ru',
+        	});
 
-    function desc_popup(feature) {
-          return '<div class="text-center"><h5><b>' + feature.properties.name + '</b></h5></div> \
-                  <div class="text-center"><b><a href="https://ru.wikipedia.org/wiki/' + feature.properties.title + '">Статья на Вики</a></b></div>'
-        }
+            var map = L.map('map', {
+        	  fullscreenControl: true,
+        	  fullscreenControlOptions: {
+        	    position: 'topleft'
+        	  },
+        	  layers: [osm_layer, bing_aerial_layer, bing_road_layer]
+        	});
 
-    L.geoJSON(place_arr, {
-      pointToLayer: function (feature, latlng) {
-      	var marker = L.marker(latlng).bindPopup(desc_popup(feature))
-      	markerArray.push(marker);
-        return markers.addLayer(marker);
-      }
-    }).addTo(map);
+        	var baseMaps = {
+        	    "OpenStreetMap": osm_layer,
+        	    "Bing (вектор)": bing_road_layer,
+        	    "Bing (спутник)": bing_aerial_layer,
+        	};
 
-    var group = new L.featureGroup(markerArray);
-    map.fitBounds(group.getBounds());
+        	L.control.layers(baseMaps).addTo(map);
 
-  </script>
+            L.geoJSON(place_arr, {
+              pointToLayer: function (feature, latlng) {
+              	var marker = L.marker(latlng).bindPopup(desc_popup(feature))
+              	markerArray.push(marker);
+                return markers.addLayer(marker);
+              }
+            }).addTo(map);
+
+            var group = L.featureGroup(markerArray);
+            map.fitBounds(group.getBounds());
+
+        </script>
+    {% endif %}
 {% endblock %}
