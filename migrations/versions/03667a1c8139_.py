@@ -32,7 +32,7 @@ def upgrade():
             nullable=True,
             comment="Дата обновления",
         ),
-        sa.Column("name", sa.String(length=255), nullable=True, comment="Тип"),
+        sa.Column("name", sa.String(length=191), nullable=True, comment="Тип"),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -51,7 +51,7 @@ def upgrade():
             comment="Дата обновления",
         ),
         sa.Column("gkgn_id", sa.String(length=8), nullable=True, comment="Код ГКГН"),
-        sa.Column("name", sa.String(length=255), nullable=True, comment="Название"),
+        sa.Column("name", sa.String(length=191), nullable=True, comment="Название"),
         sa.Column("type_id", sa.Integer(), nullable=True, comment="Тип"),
         sa.Column("level", sa.String(length=10), nullable=True, comment="Уровень"),
         sa.Column("lat", sa.Float(precision=6), nullable=True, comment="Широта"),
