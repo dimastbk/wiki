@@ -106,6 +106,9 @@ venv.bak/
 # pyCharm
 .idea
 
-#sublime
+# staff
 *.sublime-project
 *.sublime-workspace
+.vscode
+*.db
+*.db-journal
