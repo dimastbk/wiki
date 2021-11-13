@@ -23,14 +23,12 @@ def upgrade():
         sa.Column(
             "create_at",
             sa.DateTime(),
-            server_default=sa.text("(CURRENT_TIMESTAMP)"),
             nullable=True,
             comment="Дата создания",
         ),
         sa.Column(
             "update_at",
             sa.DateTime(),
-            server_default=sa.text("(CURRENT_TIMESTAMP)"),
             nullable=True,
             comment="Дата обновления",
         ),
@@ -43,14 +41,12 @@ def upgrade():
         sa.Column(
             "create_at",
             sa.DateTime(),
-            server_default=sa.text("(CURRENT_TIMESTAMP)"),
             nullable=True,
             comment="Дата создания",
         ),
         sa.Column(
             "update_at",
             sa.DateTime(),
-            server_default=sa.text("(CURRENT_TIMESTAMP)"),
             nullable=True,
             comment="Дата обновления",
         ),

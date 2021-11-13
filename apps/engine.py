@@ -17,13 +17,11 @@ class BaseModel(Model):
     create_at = db.Column(
         db.DateTime,
         default=datetime.now(),
-        server_default=db.func.now(),
         comment="Дата создания",
     )
     update_at = db.Column(
         db.DateTime,
         default=datetime.now(),
-        server_default=db.func.now(),
         onupdate=datetime.now(),
         comment="Дата обновления",
     )
