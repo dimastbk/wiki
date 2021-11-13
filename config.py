@@ -16,7 +16,8 @@ class Config:
     DB_GKGN_HOST = os.getenv("DB_GKGN_HOST")
     DB_GKGN_NAME = os.getenv("DB_GKGN_NAME")
 
-    SQLALCHEMY_DATABASE_URI = "mysql://{}:{}@{}/{}".format(
-        DB_USER, DB_PASS, DB_GKGN_HOST, DB_GKGN_NAME
-    )
+    # SQLALCHEMY_DATABASE_URI = "mysql://{}:{}@{}/{}".format(
+    #     DB_USER, DB_PASS, DB_GKGN_HOST, DB_GKGN_NAME
+    # )
+    SQLALCHEMY_DATABASE_URI = "sqlite:///db.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
