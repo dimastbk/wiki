@@ -18,4 +18,3 @@ app.register_blueprint(coord_bp, url_prefix="/coord")
 app.register_blueprint(gkgn_bp, url_prefix="/gkgn")
 
 from apps.gkgn.models import *  # noqa: F401, F403, E402
-from apps.oktmo.models import *  # noqa: F401, F403, E402
