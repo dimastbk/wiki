@@ -9,7 +9,7 @@ class Config:
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
     DB_HOST = os.getenv("DB_HOST")
-    DB_PORT = os.getenv("DB_PORT", 3306)
+    DB_PORT = int(os.getenv("DB_PORT", 3306))
     DB_USER = os.getenv("DB_USER")
     DB_PASS = os.getenv("DB_PASS")
 

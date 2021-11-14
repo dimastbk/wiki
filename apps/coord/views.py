@@ -63,10 +63,11 @@ def index_coord():
         return render_template("coord.html", form=form, formats=FORMATS, regions={})
 
     connection: MySQLdb.Connection = MySQLdb.Connect(
-        app.config["DB_HOST"],
-        app.config["DB_USER"],
-        app.config["DB_PASS"],
-        "{}_p".format(wiki),
+        host=app.config["DB_HOST"],
+        port=app.config["DB_PORT"],
+        user=app.config["DB_USER"],
+        password=app.config["DB_PASS"],
+        database="{}_p".format(wiki),
     )
 
     with connection:
@@ -91,10 +92,11 @@ def index_coord():
             cursor.execute(sql, (category.replace(" ", "_"),))
             points = cursor.fetchall()
 
-    if ext == ExtEnum.MAP or not points:
+    if ext == ExtEnum.MAP.value or not points:
         return render_template(
-            "coord/index.html",
+            "coord.html",
             form=form,
+            formats=FORMATS,
             points=makejson(points, category),
             project=get_project(wiki),
         )
@@ -113,6 +115,6 @@ def index_coord():
             content_type=formats[ext]["ct"],
         )
     else:
-        response = render_template("coord.html", form=form, formats=FORMATS, regions={})
+        response = render_template("coord.html", form=form, formats=FORMATS)
 
     return response

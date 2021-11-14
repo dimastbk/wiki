@@ -46,32 +46,24 @@
 </form>
 
 {% if points %}
-<div id="map" style="height: 500px;"></div>
+<div id="map" style="height: calc(100vh - 25rem); min-height: 500px;"></div>
 {% endif %}
 {% endblock %}
 
 {% block extend_css %}
 {% if points %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
-	integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
-	crossorigin="" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/1.6.0/Control.FullScreen.css"
-	integrity="sha256-RTALnHN76PJ32RJx2mxggy+RUt9TIRV+mfPLSLbI75A=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet/1.7.1/leaflet.min.css" />
+<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet.markercluster/1.5.0/MarkerCluster.min.css" />
+<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet.markercluster/1.5.0/MarkerCluster.Default.min.css" />
+<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet.fullscreen/2.0.0/Control.FullScreen.min.css" />
 {% endif %}
 {% endblock %}
 
 {% block extend_js %}
 {% if points %}
-<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
-	integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
-	crossorigin=""></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/1.6.0/Control.FullScreen.min.js"
-	integrity="sha256-6H5xWuqlbGtfk8UL9eMYmp14brCbCw1ZZialT8fHLRE=" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/leaflet-bing-layer@3.3.1/leaflet-bing-layer.min.js"
-	integrity="sha256-WHBwQhbzjOM8oUYBk983WdI+159mgW5jmWkmux0/Iw0=" crossorigin="anonymous"></script>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet/1.7.1/leaflet.min.js"></script>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet.markercluster/1.5.0/leaflet.markercluster.min.js"></script>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet.fullscreen/2.0.0/Control.FullScreen.min.js"></script>
 
 <script type="text/javascript">
 
@@ -90,20 +82,9 @@
 		maxClusterRadius: 20
 	});
 
-	var BING_KEY = 'AuiwpGpSbqrZDMIRrrjvmMbAuDvD6FhM0jFArLqRUKEWEQExn8iMdsO9tz-c2wxu'
 	var osm_layer = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
 		attribution: 'Data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors \
         	    			  Tiles: &copy; <a href="https://wikimediafoundation.org/w/index.php?title=Maps_Terms_of_Use#Where_does_the_map_data_come_from.3F">Wikimedia</a> contributors'
-	});
-	var bing_aerial_layer = L.tileLayer.bing({
-		bingMapsKey: BING_KEY,
-		imagerySet: 'AerialWithLabelsOnDemand',
-		culture: 'ru',
-	});
-	var bing_road_layer = L.tileLayer.bing({
-		bingMapsKey: BING_KEY,
-		imagerySet: 'RoadOnDemand',
-		culture: 'ru',
 	});
 
 	var map = L.map('map', {
@@ -111,16 +92,8 @@
 		fullscreenControlOptions: {
 			position: 'topleft'
 		},
-		layers: [osm_layer, bing_aerial_layer, bing_road_layer]
+		layers: [osm_layer]
 	});
-
-	var baseMaps = {
-		"OpenStreetMap": osm_layer,
-		"Bing (вектор)": bing_road_layer,
-		"Bing (спутник)": bing_aerial_layer,
-	};
-
-	L.control.layers(baseMaps).addTo(map);
 
 	L.geoJSON(place_arr, {
 		pointToLayer: function (feature, latlng) {
