@@ -16,7 +16,13 @@ class Config:
     DB_GKGN_HOST = os.getenv("DB_GKGN_HOST")
     DB_GKGN_NAME = os.getenv("DB_GKGN_NAME")
 
-    SQLALCHEMY_DATABASE_URI = "mysql://{}:{}@{}/{}".format(
-        DB_USER, DB_PASS, DB_GKGN_HOST, DB_GKGN_NAME
+    SQLALCHEMY_DATABASE_URI = (
+        "mysql://{user}:{password}@{host}:{port}/{database}".format(
+            user=DB_USER,
+            password=DB_PASS,
+            host=DB_GKGN_HOST,
+            port=DB_PORT,
+            database=DB_GKGN_NAME,
+        )
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False

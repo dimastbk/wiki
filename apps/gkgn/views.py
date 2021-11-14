@@ -32,14 +32,14 @@ def index_gkgn():
     form["district_id"] = to_int(request.values.get("district_id"))
     form["region_id"] = to_int(request.values.get("region_id"))
 
-    regions = (
+    regions = tuple(
         Object.query.filter_by(level=LevelEnum.REGION.value)
         .order_by(Object.name)
         .values(Object.id, Object.name)
     )
 
     region_filter = {"region_id": form["region_id"]} if form["region_id"] else {}
-    districts = (
+    districts = tuple(
         Object.query.filter_by(level=LevelEnum.DISTRICT.value, **region_filter)
         .order_by(Object.name)
         .values(Object.id, Object.name)
