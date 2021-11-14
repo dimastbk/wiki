@@ -3,7 +3,7 @@ from typing import List, cast
 from sqlalchemy.orm import relationship
 
 from apps import db
-from apps.engine import BaseModel, Model
+from apps.models import BaseModel, Model
 
 __all__ = ("Settlement", "ATE", "Type", "Object")
 

@@ -1,12 +1,14 @@
 from flask import Flask
 from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.pool import NullPool
 
 from config import Config
 
+from .engine import SQLAlchemy
+
 app = Flask(__name__)
 app.config.from_object(Config)
-db = SQLAlchemy(app)
+db = SQLAlchemy(app, engine_options={"poolclass": NullPool})
 migrate = Migrate(app, db)
 
 
