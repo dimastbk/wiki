@@ -1,4 +1,4 @@
-from typing import List, cast
+from typing import cast
 
 from sqlalchemy.orm import relationship
 
@@ -46,16 +46,16 @@ class ATE(Model):
 class Type(BaseModel):
     __tablename__ = "gkgn_type"
 
-    name = db.Column(db.String(255), comment="Тип")
+    name = db.Column(db.String(191), comment="Тип")
 
-    objects = cast(List["Object"], relationship("Object", back_populates="type"))
+    objects = cast(list["Object"], relationship("Object", back_populates="type"))
 
 
 class Object(BaseModel):
     __tablename__ = "gkgn_object"
 
     gkgn_id = db.Column(db.String(8), comment="Код ГКГН", index=True)
-    name = db.Column(db.String(255), comment="Название", index=True)
+    name = db.Column(db.String(191), comment="Название", index=True)
 
     type_id = db.Column(db.ForeignKey(Type.id), comment="Тип")
     type = cast(
