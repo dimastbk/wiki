@@ -112,3 +112,9 @@ venv.bak/
 .vscode
 *.db
 *.db-journal
+
+# pywikibot
+user-config.py
+pywikibot.lwp
+apicache-py3
+throttle.ctrl
