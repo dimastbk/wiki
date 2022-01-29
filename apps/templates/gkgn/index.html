@@ -2,6 +2,12 @@
 
 {% set nav_gkgn = True %}
 
+{% block extend_css %}
+<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/select2/4.0.13/css/select2.min.css" />
+<link rel="stylesheet"
+	href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/select2-bootstrap-5-theme/1.2.0/select2-bootstrap-5-theme.min.css" />
+{% endblock %}
+
 {% block content %}
 <p class="small">Источник: <a
 		href="https://rosreestr.gov.ru/wps/portal/p/cc_ib_portal_services/cc_ib_opendata2/!ut/p/c4/04_SB8K8xLLM9MSSzPy8xBz9CP0os3gDQ1NHQw8TA08DF3MLA0dHV7-QAG8DIDDXL8h2VAQA-EZKhA!!/?PC_7_015A1H40I0D780AAENTPK000G5000000_ru.fccland.ibmportal.spring.portlet.handler.BeanNameParameterHandlerMapping-PATH=/ShowInfoblockPageController&param_infoblock_document_path=goskatalog.htm"
@@ -25,10 +31,23 @@
 		</div>
 	</div>
 	<div class="mb-3 row">
+		<label for="type_id" class="col-sm-2 form-label">Тип:</label>
+		<div class="col-sm-6">
+			<select id="type_id" name="type_id" class="form-select" value="{{ form.type_id }}">
+				<option value="" {% if form.type=='' %} selected{% endif %}>&nbsp;</option>
+				{% for type in types %}
+				<option value="{{ type.0 }}" {% if type.0==form.type_id %} selected{% endif %}>{{ type.1
+					}}
+				</option>
+				{% endfor %}
+			</select>
+		</div>
+	</div>
+	<div class="mb-3 row">
 		<label for="region_id" class="col-sm-2 form-label">Регион:</label>
 		<div class="col-sm-6">
 			<select id="region_id" name="region_id" class="form-select" value="{{ form.region_id }}">
-				<option {% if form.region_id=='' %} selected{% endif %}></option>
+				<option value="" {% if form.region_id=='' %} selected{% endif %}>&nbsp;</option>
 				{% for region in regions %}
 				<option value="{{ region.0 }}" {% if region.0==form.region_id %} selected{% endif %}>{{ region.1 }}
 				</option>
@@ -39,8 +58,8 @@
 	<div class="mb-3 row">
 		<label for="district_id" class="col-sm-2 form-label">Район:</label>
 		<div class="col-sm-6">
-			<select id="district_id" name="district_id" class="form-select" value="{{ form.district_id }}">
-				<option {% if form.district=='' %} selected{% endif %}></option>
+			<select id="district_id" name="district_id" class="form-select" value="{{ form.district_id }}" {% if not districts %}disabled{% endif %}>
+				<option value="" {% if form.district=='' %} selected{% endif %}>&nbsp;</option>
 				{% for district in districts %}
 				<option value="{{ district.0 }}" {% if district.0==form.district_id %} selected{% endif %}>{{ district.1
 					}}
@@ -61,4 +80,23 @@
 
 {% endblock %}
 
-{% block extend_js %}{% endblock %}
+{% block extend_js %}
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.6.0/jquery.slim.min.js"></script>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/select2/4.0.13/js/select2.full.min.js"></script>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/select2/4.0.13/js/i18n/ru.min.js"></script>
+
+<script>
+	$("#type_id").select2({
+		theme: "bootstrap-5",
+		language: "ru"
+	});
+	$("#region_id").select2({
+		theme: "bootstrap-5",
+		language: "ru"
+	});
+	$("#district_id").select2({
+		theme: "bootstrap-5",
+		language: "ru"
+	});
+</script>
+{% endblock %}

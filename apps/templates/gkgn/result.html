@@ -20,7 +20,8 @@
 						key.name }}</a>{% elif key.level == 'DISTRICT' %}<a
 						href="{{ url_for('gkgn.index_gkgn', region_id=key.region.id, district_id=key.id) }}">{{
 						key.name }}</a>{% else %} {{ key.name }} {% endif %}</td>
-				<td>{{ key.type.name }}</td>
+				<td><a href="{{ url_for('gkgn.index_gkgn', type_id=key.type.id) }}">{{
+						key.type.name }}</a></td>
 				<td>{% if key.region %}<a href="{{ url_for('gkgn.index_gkgn', region_id=key.region.id) }}">{{
 						key.region.name }}</a>{% endif %}</td>
 				<td>{% if key.district %}<a
