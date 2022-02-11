@@ -1,27 +1,13 @@
 import time
 
 from flask import Flask, g
-from flask_migrate import Migrate
-from greenlet import getcurrent as _ident_func
-from redis import Redis
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.pool import NullPool
 
 from config import Config
 
-from .engine import SQLAlchemy
+from .db import session
 
 app = Flask(__name__)
 app.config.from_object(Config)
-migrate = Migrate(app, SQLAlchemy(app))
-
-engine = create_engine(Config.SQLALCHEMY_DATABASE_URI, poolclass=NullPool)
-session = scoped_session(
-    sessionmaker(autocommit=False, autoflush=False, bind=engine), scopefunc=_ident_func
-)
-
-cache = Redis(host=Config.REDIS_HOST, port=Config.REDIS_PORT)
 
 from apps import views  # noqa: F401, E402
 from apps.coord.views import coord_bp  # noqa: E402

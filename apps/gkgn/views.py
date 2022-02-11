@@ -3,7 +3,7 @@ from typing import Any
 from flask import Blueprint, render_template, request
 from sqlalchemy import select
 
-from apps import session
+from apps.db import session
 
 from .constants import LevelEnum
 from .models import Object, Type

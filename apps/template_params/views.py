@@ -1,10 +1,12 @@
 import json
+from datetime import timedelta
 from typing import Any
 
 from flask import Blueprint, render_template, request
 from sqlalchemy import and_, func, select
 
-from apps import cache, session
+from apps.cache import cache, make_cache_key
+from apps.db import session
 
 from .models import Namespace, Page, PageTemplate, Param, Template
 
@@ -56,7 +58,7 @@ def index():
 
     result: list[PageTemplate] = session.scalars(query).unique().all()
 
-    params_cache = cache.get(form["template"])
+    params_cache = cache.get(make_cache_key("template_params", form["template"]))
     if params_cache:
         all_params = json.loads(params_cache)
     else:
@@ -70,7 +72,11 @@ def index():
         )
         all_params = session.scalars(query).all()
 
-        cache.set(form["template"], json.dumps(all_params))
+        cache.set(
+            make_cache_key("template_params", form["template"]),
+            json.dumps(all_params),
+            ex=timedelta(hours=24),
+        )
 
     for item in result:
         item_params = {p.name: p.value for p in item.params}
@@ -78,7 +84,7 @@ def index():
         for param in all_params:
             item.flat_params.append(item_params.get(param, ""))
 
-    count_cache = cache.get(f'count:{form["template"]}')
+    count_cache = cache.get(make_cache_key("count", form["template"]))
     if count_cache:
         count = count_cache
     else:
@@ -91,7 +97,9 @@ def index():
             .where(Template.title == form["template"], Namespace.number == "0")
         )
         count = session.scalar(query)
-        cache.set(f'count:{form["template"]}', count)
+        cache.set(
+            make_cache_key("count", form["template"]), count, ex=timedelta(hours=24)
+        )
 
     return render_template(
         "template_params/index.html",

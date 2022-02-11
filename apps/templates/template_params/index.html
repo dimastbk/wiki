@@ -42,7 +42,7 @@
 		<tbody>
 			{% for item in result %}
 			<tr>
-				<th><a href="https://ru.wikipedia.org/w/index.php?pageid={{ item.page.wiki_id }}">{{ item.page.title }}</a></th>
+				<th><a href="https://ru.wikipedia.org/w/index.php?curid={{ item.page.wiki_id }}">{{ item.page.title }}</a></th>
 				{% for param in item.flat_params %}
 				<td>{{ param }}</td>
 				{% endfor %}
