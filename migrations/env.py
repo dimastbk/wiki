@@ -6,6 +6,10 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from config import Config
+
+from apps.models import Model
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -19,13 +23,10 @@ logger = logging.getLogger("alembic.env")
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from flask import current_app
-
 config.set_main_option(
-    "sqlalchemy.url",
-    current_app.config.get("SQLALCHEMY_DATABASE_URI").replace("%", "%%"),
+    "sqlalchemy.url", Config.SQLALCHEMY_DATABASE_URI.replace("%", "%%")
 )
-target_metadata = current_app.extensions["migrate"].db.metadata
+target_metadata = Model.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -81,7 +82,6 @@ def run_migrations_online():
             connection=connection,
             target_metadata=target_metadata,
             process_revision_directives=process_revision_directives,
-            **current_app.extensions["migrate"].configure_args
         )
 
         with context.begin_transaction():

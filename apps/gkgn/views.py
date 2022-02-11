@@ -1,7 +1,9 @@
-from timeit import default_timer
 from typing import Any
 
 from flask import Blueprint, render_template, request
+from sqlalchemy import select
+
+from apps import session
 
 from .constants import LevelEnum
 from .models import Object, Type
@@ -18,7 +20,6 @@ def to_int(value: Any) -> int:
 
 @gkgn_bp.route("/")
 def index_gkgn():
-    t = default_timer()
 
     result = []
     form = {}
@@ -33,28 +34,33 @@ def index_gkgn():
     form["district_id"] = to_int(request.values.get("district_id"))
     form["type_id"] = to_int(request.values.get("type_id"))
 
-    regions = tuple(
-        Object.query.filter_by(level=LevelEnum.REGION.value)
+    query = (
+        select(Object.id, Object.name)
+        .where(Object.level == LevelEnum.REGION.value)
         .order_by(Object.name)
-        .values(Object.id, Object.name)
     )
+    regions = session.execute(query).all()
 
     if form["region_id"]:
-        districts = tuple(
-            Object.query.filter_by(
-                level=LevelEnum.DISTRICT.value, region_id=form["region_id"]
+        query = (
+            select(Object.id, Object.name)
+            .where(
+                Object.level == LevelEnum.DISTRICT.value,
+                Object.region_id == form["region_id"],
             )
             .order_by(Object.name)
-            .values(Object.id, Object.name)
         )
+        districts = session.execute(query).all()
     else:
         districts = []
 
-    types = tuple(Type.query.order_by(Type.name).values(Type.id, Type.name))
+    query = select(Type.id, Type.name).order_by(Type.name)
+    types = session.execute(query).all()
 
-    query = {key: value for key, value in form.items() if value}
-    if query:
-        result = Object.query.filter_by(**query).order_by(order_by).all()
+    params = [getattr(Object, key) == value for key, value in form.items() if value]
+    if params:
+        query = select(Object).where(*params).order_by(getattr(Object, order_by))
+        result = session.scalars(query).all()
 
     return render_template(
         "gkgn/index.html",
@@ -63,6 +69,5 @@ def index_gkgn():
         types=types,
         result=result,
         len=len(result),
-        time=default_timer() - t,
         form=form,
     )

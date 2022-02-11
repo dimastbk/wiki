@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% set nav_template_params = True %}
+
+{% block extend_css %}
+<style>
+	th:first-child,
+	td:first-child {
+		left: 0px;
+		position: sticky;
+	}
+</style>
+{% endblock %}
+
+{% block content %}
+<form action="{{ url_for('template_params.index') }}" method="GET">
+	<div class="mb-3 row">
+		<label for="template" class="col-sm-2 form-label">Шаблон:</label>
+		<div class="col-sm-6">
+			<input id="template" name="template" class="form-control" value="{{ form.template }}">
+		</div>
+	</div>
+	<div class="mb-3 row">
+		<div class="col-sm-2"></div>
+		<div class="col-sm-6">
+			<button type="submit" class="btn btn-outline-dark">Отправить</button>
+		</div>
+	</div>
+</form>
+
+<div class="table-responsive lh-1 text-nowrap" style="font-size: 85%">
+	<table class="table table-sm table-hover caption-top">
+		<caption>Найдено записей: {{ len }}, время выполнения: __EXECUTION_TIME__ с</caption>
+		<thead>
+			<tr>
+				<th scope="col">Статья</th>
+				{% for param in all_params %}
+				<th>{{ param }}</th>
+				{% endfor %}
+			</tr>
+		</thead>
+		<tbody>
+			{% for item in result %}
+			<tr>
+				<th><a href="https://ru.wikipedia.org/w/index.php?pageid={{ item.page.wiki_id }}">{{ item.page.title }}</a></th>
+				{% for param in item.flat_params %}
+				<td>{{ param }}</td>
+				{% endfor %}
+
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}

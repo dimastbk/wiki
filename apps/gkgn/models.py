@@ -1,43 +1,45 @@
 from typing import cast
 
+import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
-from apps import db
 from apps.models import BaseModel, Model
 
 __all__ = ("Settlement", "ATE", "Type", "Object")
 
 
 class Settlement(Model):
-    id = db.Column(db.Integer, primary_key=True)
-    gkgn_id = db.Column(db.Integer)
-    name = db.Column(db.String(256))
-    okato_name = db.Column(db.String(256))
-    oktmo_name = db.Column(db.String(256))
-    types = db.Column(db.String(100))
-    region = db.Column(db.String(256))
-    district = db.Column(db.String(256))
-    c_lat = db.Column(db.Float(precision=6))
-    c_lon = db.Column(db.Float(precision=6))
-    okato = db.Column(db.String(11))
-    oktmo = db.Column(db.String(11))
-    oktmo_up = db.Column(db.String(11))
+    __tablename__ = "settlement"
+
+    gkgn_id = sa.Column(sa.Integer)
+    name = sa.Column(sa.String(256))
+    okato_name = sa.Column(sa.String(256))
+    oktmo_name = sa.Column(sa.String(256))
+    types = sa.Column(sa.String(100))
+    region = sa.Column(sa.String(256))
+    district = sa.Column(sa.String(256))
+    c_lat = sa.Column(sa.Float(precision=6))
+    c_lon = sa.Column(sa.Float(precision=6))
+    okato = sa.Column(sa.String(11))
+    oktmo = sa.Column(sa.String(11))
+    oktmo_up = sa.Column(sa.String(11))
 
     def __repr__(self):
         return "<Settlement {}>".format(self.name)
 
 
 class ATE(Model):
-    id = db.Column(db.Integer, primary_key=True)
-    gkgn_id = db.Column(db.Integer)
-    name = db.Column(db.String(256))
-    okato_name = db.Column(db.String(256))
-    oktmo_name = db.Column(db.String(256))
-    types = db.Column(db.String(100))
-    region = db.Column(db.String(256))
-    okato = db.Column(db.String(11))
-    oktmo = db.Column(db.String(11))
-    oktmo_up = db.Column(db.String(11))
+    __tablename__ = "ATE"
+
+    gkgn_id = sa.Column(sa.Integer)
+    name = sa.Column(sa.String(256))
+    okato_name = sa.Column(sa.String(256))
+    oktmo_name = sa.Column(sa.String(256))
+    types = sa.Column(sa.String(100))
+    region = sa.Column(sa.String(256))
+    okato = sa.Column(sa.String(11))
+    oktmo = sa.Column(sa.String(11))
+    oktmo_up = sa.Column(sa.String(11))
 
     def __repr__(self):
         return "<ATE {}>".format(self.name)
@@ -46,7 +48,7 @@ class ATE(Model):
 class Type(BaseModel):
     __tablename__ = "gkgn_type"
 
-    name = db.Column(db.String(191), comment="Тип")
+    name = sa.Column(sa.String(191), comment="Тип")
 
     objects = cast(list["Object"], relationship("Object", back_populates="type"))
 
@@ -54,19 +56,19 @@ class Type(BaseModel):
 class Object(BaseModel):
     __tablename__ = "gkgn_object"
 
-    gkgn_id = db.Column(db.String(8), comment="Код ГКГН", index=True)
-    name = db.Column(db.String(191), comment="Название", index=True)
+    gkgn_id = sa.Column(sa.String(8), comment="Код ГКГН", index=True)
+    name = sa.Column(sa.String(191), comment="Название", index=True)
 
-    type_id = db.Column(db.ForeignKey(Type.id), comment="Тип")
+    type_id = sa.Column(sa.ForeignKey(Type.id), comment="Тип", index=True)
     type = cast(
         Type, relationship(Type, back_populates="objects", lazy="joined", uselist=False)
     )
-    level = db.Column(db.String(10), comment="Уровень", index=True)
+    level = sa.Column(sa.String(10), comment="Уровень", index=True)
 
-    lat = db.Column(db.Float(precision=6), comment="Широта")
-    lon = db.Column(db.Float(precision=6), comment="Долгота")
+    lat = sa.Column(sa.Float(precision=6), comment="Широта")
+    lon = sa.Column(sa.Float(precision=6), comment="Долгота")
 
-    region_id = db.Column(db.ForeignKey("gkgn_object.id"), index=True)
+    region_id = sa.Column(sa.ForeignKey("gkgn_object.id"), index=True)
     region = cast(
         "Object",
         relationship(
@@ -74,7 +76,7 @@ class Object(BaseModel):
         ),
     )
 
-    district_id = db.Column(db.ForeignKey("gkgn_object.id"), index=True)
+    district_id = sa.Column(sa.ForeignKey("gkgn_object.id"), index=True)
     district = cast(
         "Object",
         relationship("Object", foreign_keys=[district_id], remote_side="Object.id"),

@@ -1,26 +1,33 @@
 from datetime import datetime
 
-from sqlalchemy.orm.query import Query
+import sqlalchemy as sa
+from sqlalchemy.orm.decl_api import DeclarativeMeta, registry
 
-from . import db
+mapper_registry = registry()
 
 
-class Model(db.Model):
+class Model(metaclass=DeclarativeMeta):
     __abstract__ = True
-    query: Query
+
+    registry = mapper_registry
+    metadata = mapper_registry.metadata
+
+    __init__ = mapper_registry.constructor
+    __table__: sa.Table
+
+    id = sa.Column(sa.BigInteger, primary_key=True)
 
 
 class BaseModel(Model):
     __abstract__ = True
 
-    id = db.Column(db.Integer, primary_key=True)
-    create_at = db.Column(
-        db.DateTime,
+    create_at = sa.Column(
+        sa.DateTime,
         default=datetime.now(),
         comment="Дата создания",
     )
-    update_at = db.Column(
-        db.DateTime,
+    update_at = sa.Column(
+        sa.DateTime,
         default=datetime.now(),
         onupdate=datetime.now(),
         comment="Дата обновления",
