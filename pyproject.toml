@@ -20,6 +20,7 @@ python-slugify = "^5.0.2"
 geojson = "^2.5.0"
 
 redis = "^4.1.3"
+wikitextparser = "^0.48.0"
 # pywikibot = {extras = ["mwparserfromhell"], version = "^6.6.3"}
 # requests-oauthlib = "^1.3.0"
 
