@@ -8,8 +8,11 @@ from wikitextparser import parse as wtp_parse
 
 from config import Config
 
-from apps.models import Model
 from apps.template_params.models import Namespace, Page, PageTemplate, Param, Template
+
+DUMP_PATH = (
+    "/public/dumps/public/ruwiki/latest/ruwiki-latest-pages-meta-current.xml.bz2"
+)
 
 engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
 session: Session = sessionmaker(bind=engine)()
@@ -49,7 +52,7 @@ class Counter:
 counter = Counter()
 
 objs = []
-with bz2.BZ2File("../data/ruwiki-20220120-pages-meta-current.xml.bz2", "r") as file:
+with bz2.BZ2File(DUMP_PATH, "r") as file:
     while line := file.readline().decode():
         if line.strip().startswith("<namespace "):
             elem = cElementTree.fromstring(line.strip())
@@ -63,8 +66,6 @@ with bz2.BZ2File("../data/ruwiki-20220120-pages-meta-current.xml.bz2", "r") as f
             )
             namespaces[elem.get("key")] = id
         elif line.strip() == "</namespaces>":
-            Model.metadata.drop_all(engine)
-            Model.metadata.create_all(engine)
             with engine.connect() as conn:
                 conn.execute(Namespace.__table__.insert(), objs)
             print("Namespaces created...")
@@ -75,7 +76,7 @@ template_objs = []
 page_objs = []
 page_template_objs = []
 param_objs = []
-with bz2.BZ2File("../data/ruwiki-20220120-pages-meta-current.xml.bz2", "r") as file:
+with bz2.BZ2File(DUMP_PATH, "r") as file:
     c = 0
     e = 0
     t = default_timer()
