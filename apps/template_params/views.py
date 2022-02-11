@@ -82,7 +82,7 @@ def index():
         item_params = {p.name: p.value for p in item.params}
         item.flat_params = []
         for param in all_params:
-            item.flat_params.append(item_params.get(param, ""))
+            item.flat_params.append(item_params.get(param, "__NONE__"))
 
     count_cache = cache.get(make_cache_key("count", form["template"]))
     if count_cache:
@@ -106,5 +106,6 @@ def index():
         all_params=all_params,
         result=result,
         len=len(result),
+        count=count.decode(),
         form=form,
     )

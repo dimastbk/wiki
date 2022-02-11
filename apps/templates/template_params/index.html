@@ -29,8 +29,8 @@
 </form>
 
 <div class="table-responsive lh-1 text-nowrap" style="font-size: 85%">
-	<table class="table table-sm table-hover caption-top">
-		<caption>Найдено записей: {{ len }}, время выполнения: __EXECUTION_TIME__ с</caption>
+	<table class="table table-sm table-hover caption-top table-bordered">
+		<caption>Показано записей: {{ len }} (всего {{ count }}), время выполнения: __EXECUTION_TIME__ с</caption>
 		<thead>
 			<tr>
 				<th scope="col">Статья</th>
@@ -42,11 +42,12 @@
 		<tbody>
 			{% for item in result %}
 			<tr>
-				<th><a href="https://ru.wikipedia.org/w/index.php?curid={{ item.page.wiki_id }}">{{ item.page.title }}</a></th>
+				<th><a href="https://ru.wikipedia.org/w/index.php?curid={{ item.page.wiki_id }}">{{ item.page.title
+						}}</a></th>
 				{% for param in item.flat_params %}
-				<td>{{ param }}</td>
+				{% if param == '__NONE__' %}<td></td>{% elif param %}<td>{{ param }}</td>{% else %}<td class="table-info"></td>
+				{% endif %}
 				{% endfor %}
-
 			</tr>
 			{% endfor %}
 		</tbody>
