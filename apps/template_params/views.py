@@ -2,6 +2,7 @@ import json
 from dataclasses import dataclass
 from datetime import timedelta
 from typing import Any, Optional
+from urllib.parse import quote, unquote
 
 from flask import Blueprint, render_template, request, url_for
 from sqlalchemy import and_, func, select
@@ -118,9 +119,7 @@ def make_headers(form: Form, all_params: list) -> list:
                 "link": url_for(
                     "template_params.index",
                     template=form.template,
-                    order_by=",".join(
-                        map(lambda x: x.replace(",", "%2C"), order_by_list)
-                    ),
+                    order_by=",".join(map(quote, order_by_list)),
                     page=form.page,
                 ),
                 "icon": order_icon,
@@ -136,12 +135,7 @@ def index():
             request.values.get("template", "")[:1].upper()
             + request.values.get("template", "")[1:]
         ),
-        order_by=list(
-            map(
-                lambda x: x.replace("%2C", ","),
-                request.values.get("order_by", "").split(","),
-            )
-        )
+        order_by=list(map(unquote, request.values.get("order_by", "").split(",")))
         if request.values.get("order_by")
         else [],
         page=to_int(request.values.get("page"), 1),
