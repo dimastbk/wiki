@@ -22,8 +22,16 @@
 	</div>
 	<div class="mb-3 row">
 		<div class="col-sm-2"></div>
-		<div class="col-sm-6">
+		<div class="col-sm-4">
 			<button type="submit" class="btn btn-outline-dark">Отправить</button>
+		</div>
+		<div class="col-sm-2">
+			<ul class="pagination">
+				{% for page in pagination %}
+				<li class="page-item {% if page.active %}active{% endif %}{% if page.disabled %}disabled{% endif %}"><a class="page-link"
+						href="{{ page.link }}">{{ page.value }}</a></li>
+				{% endfor %}
+			</ul>
 		</div>
 	</div>
 </form>
@@ -34,8 +42,8 @@
 		<thead>
 			<tr>
 				<th scope="col">Статья</th>
-				{% for param in all_params %}
-				<th>{{ param }}</th>
+				{% for param in table_header %}
+				<th><a href="{{ param.link }}">{{ param.name }} {{ param.icon }}</a></th>
 				{% endfor %}
 			</tr>
 		</thead>
@@ -45,7 +53,8 @@
 				<th><a href="https://ru.wikipedia.org/w/index.php?curid={{ item.page.wiki_id }}">{{ item.page.title
 						}}</a></th>
 				{% for param in item.flat_params %}
-				{% if param == '__NONE__' %}<td></td>{% elif param %}<td>{{ param }}</td>{% else %}<td class="table-info"></td>
+				{% if param == '__NONE__' %}<td></td>{% elif param %}<td>{{ param }}</td>{% else %}<td
+					class="table-info"></td>
 				{% endif %}
 				{% endfor %}
 			</tr>
