@@ -166,7 +166,7 @@ def index():
         .join(Page)
         .join(Namespace)
         .join(Template)
-        .where(Template.title == form.template, Namespace.number == "0")
+        .where(Template.title == form.template)
     )
 
     for order in form.order_by:
@@ -186,17 +186,19 @@ def index():
             isouter=True,
         ).order_by(order_by_clause)
 
+    # Переносим параметры сортировки в начало
     for order in reversed(form.order_by):
         order_plain = order.removeprefix("-")
         if order_plain in all_params:
             all_params.remove(order_plain)
             all_params.insert(0, order_plain)
 
-    result: list[PageTemplate] = (
-        session.scalars(query.limit(form.limit).offset((form.page - 1) * form.limit))
-        .unique()
-        .all()
+    query = (
+        query.limit(form.limit)
+        .offset((form.page - 1) * form.limit)
+        .order_by(Page.namespace_id, Page.title)
     )
+    result: list[PageTemplate] = session.scalars(query).unique().all()
 
     for item in result:
         item_params = {p.name: p.value for p in item.params}
@@ -208,7 +210,13 @@ def index():
     if count_cache:
         count = count_cache.decode()
     else:
-        count = session.scalar(query.select(func.count()))
+        query = (
+            select(func.count())
+            .select_from(PageTemplate)
+            .join(Template)
+            .where(Template.title == form.template)
+        )
+        count = session.scalar(query)
         cache.set(make_cache_key("count", form.template), count, ex=timedelta(hours=24))
 
     form.page_count = int(count) // form.limit + 1
