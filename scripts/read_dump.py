@@ -2,9 +2,9 @@ import bz2
 from timeit import default_timer
 from xml.etree import cElementTree
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
-from wikitextparser import parse as wtp_parse
+import regex
+import sqlalchemy as sa
+from wikitextparser import Template as WtpTemplate
 
 from config import Config
 
@@ -14,8 +14,7 @@ DUMP_PATH = (
     "/public/dumps/public/ruwiki/latest/ruwiki-latest-pages-meta-current.xml.bz2"
 )
 
-engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
-session: Session = sessionmaker(bind=engine)()
+engine = sa.create_engine(Config.SQLALCHEMY_DATABASE_URI)
 
 
 namespaces: dict[str, int] = {}
@@ -71,11 +70,85 @@ with bz2.BZ2File(DUMP_PATH, "r") as file:
             print("Namespaces created...")
             break
 
-templates: dict[str, int] = {}
-template_objs = []
-page_objs = []
-page_template_objs = []
-param_objs = []
+DUMP_RE = regex.compile(
+    (
+        r"<title>(?P<title>.*?)</title>.*?"
+        r"<ns>(?P<ns>.*?)</ns>.*?"
+        r"<id>(?P<id>.*?)</id>.*?"
+        r"<text[^>]+>(?P<text>.*?)</text>"
+    ),
+    regex.DOTALL,
+)
+
+TEMPLATE_RE = regex.compile(r"\{\{[^}{]*+(?:(?R)[^}{]*)*+\}\}", regex.V1)
+
+insert_page = str(
+    Page.__table__.insert()
+    .values(
+        id=sa.bindparam("id"),
+        title=sa.bindparam("title"),
+        wiki_id=sa.bindparam("wiki_id"),
+        namespace_id=sa.bindparam("namespace_id"),
+    )
+    .compile(dialect=engine.dialect)
+)
+
+insert_template = str(
+    Template.__table__.insert()
+    .values(
+        id=sa.bindparam("id"),
+        title=sa.bindparam("title"),
+    )
+    .compile(dialect=engine.dialect)
+)
+
+insert_page_temlplate = str(
+    PageTemplate.__table__.insert()
+    .values(
+        id=sa.bindparam("id"),
+        template_id=sa.bindparam("template_id"),
+        page_id=sa.bindparam("page_id"),
+    )
+    .compile(dialect=engine.dialect)
+)
+
+insert_param = str(
+    Param.__table__.insert()
+    .values(
+        id=sa.bindparam("id"),
+        page_template_id=sa.bindparam("page_template_id"),
+        name=sa.bindparam("name"),
+        value=sa.bindparam("value"),
+    )
+    .compile(dialect=engine.dialect)
+)
+
+template_pks: dict[str, int] = {}
+template_objs: list[tuple[int, str]] = []
+page_objs: list[tuple[int, str, str, int]] = []
+page_template_objs: list[tuple[int, int, int]] = []
+param_objs: list[tuple[int, int, str, str]] = []
+
+
+def save():
+    print(default_timer() - t)
+    print(f"{c} ({e})")
+
+    with engine.connect() as conn:
+        cursor = conn.connection.cursor()
+        cursor.executemany(insert_page, page_objs)
+        cursor.executemany(insert_template, template_objs)
+        cursor.executemany(insert_page_temlplate, page_template_objs)
+        cursor.executemany(insert_param, param_objs)
+
+    page_objs.clear()
+    template_objs.clear()
+    page_template_objs.clear()
+    param_objs.clear()
+
+    print(default_timer() - t)
+
+
 with bz2.BZ2File(DUMP_PATH, "r") as file:
     c = 0
     e = 0
@@ -86,73 +159,54 @@ with bz2.BZ2File(DUMP_PATH, "r") as file:
             node = line
         elif line.strip() == "</page>":
             e += 1
-            node = node + "\n" + line
-            elem = cElementTree.fromstring(node)
 
-            text = elem.find("revision").find("text").text
-            title = elem.find("title").text
-            if not text or not title:
+            matched = DUMP_RE.search(node)
+            if not matched:
                 continue
 
-            page = wtp_parse(text)
-            if not page.templates:
+            text = matched.group("text")
+            title = matched.group("title")
+            wiki_id = matched.group("id")
+            ns = matched.group("ns")
+
+            page_templates = TEMPLATE_RE.findall(text)
+            if not page_templates:
                 continue
 
             c += 1
 
             page_id = counter.page_id()
-            page_objs.append(
-                {
-                    "id": page_id,
-                    "title": title,
-                    "wiki_id": elem.find("id").text,
-                    "namespace_id": namespaces[elem.find("ns").text],
-                }
-            )
-            for template in page.templates:
-                template_name = template.name.strip()
-                template_name = template_name[:1].title() + template_name[1:]
-                template_id = templates.get(template_name)
-                if not template_id:
-                    template_id = counter.template_id()
-                    template_objs.append(
-                        {
-                            "id": template_id,
-                            "title": template_name,
-                        }
-                    )
-                    templates[template_name] = template_id
-
-                page_template_id = counter.page_template_id()
-                page_template_objs.append(
-                    {
-                        "id": page_template_id,
-                        "page_id": page_id,
-                        "template_id": template_id,
-                    }
+            page_objs.append((page_id, title, wiki_id, namespaces[ns]))
+            for template_str in page_templates:
+                template = WtpTemplate(template_str)
+                template_name = template.normal_name(
+                    rm_namespaces=("Template", "Шаблон", "T", "Ш"),
+                    code="ru",
+                    capitalize=True,
                 )
 
+                template_id = template_pks.get(template_name)
+                if not template_id:
+                    template_id = counter.template_id()
+                    template_objs.append((template_id, template_name))
+                    template_pks[template_name] = template_id
+
+                page_template_id = counter.page_template_id()
+                page_template_objs.append((page_template_id, template_id, page_id))
+
                 for param in template.arguments:
+                    param_name = param.name.strip()
                     param_objs.append(
-                        {
-                            "id": counter.param_id(),
-                            "page_template_id": page_template_id,
-                            "name": param.name.strip(),
-                            "value": param.value.strip(),
-                        }
+                        (
+                            counter.param_id(),
+                            page_template_id,
+                            param_name if param_name else "__EMPTY__",
+                            param.value.strip(),
+                        )
                     )
             if c % 5000 == 0:
-                print(default_timer() - t)
-                print(f"{c} ({e})")
-                with engine.connect() as conn:
-                    conn.execute(Page.__table__.insert(), page_objs)
-                    conn.execute(Template.__table__.insert(), template_objs)
-                    conn.execute(PageTemplate.__table__.insert(), page_template_objs)
-                    conn.execute(Param.__table__.insert(), param_objs)
-                page_objs = []
-                template_objs = []
-                page_template_objs = []
-                param_objs = []
-                print(default_timer() - t)
+                save()
         else:
-            node = node + "\n" + line
+            node = node + line
+
+save()
