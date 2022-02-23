@@ -1,32 +1,39 @@
-import os
-
-from dotenv import find_dotenv, load_dotenv
-
-load_dotenv(find_dotenv())
+from pydantic import BaseSettings
 
 
-class Config:
-    BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+class Config(BaseSettings):
+    DB_HOST: str
+    DB_PORT: int = 3306
+    DB_USER: str
+    DB_PASS: str
 
-    DB_HOST = os.getenv("DB_HOST")
-    DB_PORT = int(os.getenv("DB_PORT", 3306))
-    DB_USER = os.getenv("DB_USER")
-    DB_PASS = os.getenv("DB_PASS")
+    DB_GKGN_HOST: str
+    DB_GKGN_NAME: str
 
-    DB_GKGN_HOST = os.getenv("DB_GKGN_HOST")
-    DB_GKGN_NAME = os.getenv("DB_GKGN_NAME")
-
-    SQLALCHEMY_DATABASE_URI = (
-        "mysql://{user}:{password}@{host}:{port}/{database}".format(
-            user=DB_USER,
-            password=DB_PASS,
-            host=DB_GKGN_HOST,
-            port=DB_PORT,
-            database=DB_GKGN_NAME,
+    @property
+    def SQLALCHEMY_BASE_URI(self) -> str:
+        return "mysql://{user}:{password}@{host}:{port}/".format(
+            user=self.DB_USER,
+            password=self.DB_PASS,
+            host=self.DB_GKGN_HOST,
+            port=self.DB_PORT,
         )
-    )
+
+    def SQLALCHEMY_DATABASE_URI(self, database: str = None) -> str:
+        if database:
+            return self.SQLALCHEMY_BASE_URI + self.DB_USER + "__" + database
+        else:
+            return self.SQLALCHEMY_BASE_URI + self.DB_GKGN_NAME
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    REDIS_HOST = os.getenv("REDIS_HOST")
-    REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+    REDIS_HOST: str
+    REDIS_PORT: int = 6379
     REDIS_PREFIX = "dimabot:cache:{}"
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
+
+config = Config()

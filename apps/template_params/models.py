@@ -39,6 +39,8 @@ class BasePage(Model):
 class Template(BasePage):
     __tablename__ = "template"
 
+    redirect_id = sa.Column(sa.ForeignKey("template.id"), index=True)
+
     params = cast(
         list["PageTemplate"], relationship("PageTemplate", back_populates="template")
     )

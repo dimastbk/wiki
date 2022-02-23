@@ -1,24 +1,21 @@
 import bz2
+import os
+import re
+from datetime import date
 from timeit import default_timer
 from xml.etree import cElementTree
 
-import regex
 import sqlalchemy as sa
-from wikitextparser import Template as WtpTemplate
+from wikitextparser import parse as wtp_parse
 
-from config import Config
+from config import config
 
+from apps.models import Model
 from apps.template_params.models import Namespace, Page, PageTemplate, Param, Template
 
 DUMP_PATH = (
     "/public/dumps/public/ruwiki/latest/ruwiki-latest-pages-meta-current.xml.bz2"
 )
-
-engine = sa.create_engine(Config.SQLALCHEMY_DATABASE_URI)
-
-
-namespaces: dict[str, int] = {}
-
 
 class Counter:
     _page_id = 0
@@ -50,6 +47,45 @@ class Counter:
 
 counter = Counter()
 
+project_search = re.search(
+    r"/([a-z]+)-(\d{4})(\d{2})(\d{2})", os.path.realpath(DUMP_PATH)
+)
+
+assert project_search
+
+update_date = date(
+    int(project_search.group(2)),
+    int(project_search.group(3)),
+    int(project_search.group(4)),
+)
+
+engine = sa.create_engine(config.SQLALCHEMY_DATABASE_URI(project_search.group(1)))
+
+
+# Очищаем все таблицы (код для MySQL)
+Model.metadata.drop_all(
+    engine,
+    tables=[
+        Namespace.__table__,
+        Page.__table__,
+        PageTemplate.__table__,
+        Param.__table__,
+        Template.__table__,
+    ],
+)
+Model.metadata.create_all(
+    engine,
+    tables=[
+        Namespace.__table__,
+        Page.__table__,
+        PageTemplate.__table__,
+        Param.__table__,
+        Template.__table__,
+    ],
+)
+
+
+namespaces: dict[str, int] = {}
 objs = []
 with bz2.BZ2File(DUMP_PATH, "r") as file:
     while line := file.readline().decode():
@@ -70,17 +106,16 @@ with bz2.BZ2File(DUMP_PATH, "r") as file:
             print("Namespaces created...")
             break
 
-DUMP_RE = regex.compile(
+DUMP_RE = re.compile(
     (
         r"<title>(?P<title>.*?)</title>.*?"
         r"<ns>(?P<ns>.*?)</ns>.*?"
         r"<id>(?P<id>.*?)</id>.*?"
+        r"(?:<redirect title=\"(?P<redirect>.*?)\" />.*?)?"
         r"<text[^>]+>(?P<text>.*?)</text>"
     ),
-    regex.DOTALL,
+    re.DOTALL,
 )
-
-TEMPLATE_RE = regex.compile(r"\{\{[^}{]*+(?:(?R)[^}{]*)*+\}\}", regex.V1)
 
 insert_page = str(
     Page.__table__.insert()
@@ -123,11 +158,20 @@ insert_param = str(
     .compile(dialect=engine.dialect)
 )
 
+update_template_redirect = str(
+    Template.__table__.update()
+    .where(Template.__table__.c.id == sa.bindparam("id"))
+    .values(redirect_id=sa.bindparam("redirect_id"))
+    .compile(dialect=engine.dialect)
+)
+
 template_pks: dict[str, int] = {}
 template_objs: list[tuple[int, str]] = []
 page_objs: list[tuple[int, str, str, int]] = []
 page_template_objs: list[tuple[int, int, int]] = []
 param_objs: list[tuple[int, int, str, str]] = []
+redirects: dict[str, str] = {}
+redirect_pks: list[tuple[int, int]] = []
 
 
 def save():
@@ -140,6 +184,7 @@ def save():
         cursor.executemany(insert_template, template_objs)
         cursor.executemany(insert_page_temlplate, page_template_objs)
         cursor.executemany(insert_param, param_objs)
+        conn.connection.commit()
 
     page_objs.clear()
     template_objs.clear()
@@ -147,6 +192,18 @@ def save():
     param_objs.clear()
 
     print(default_timer() - t)
+
+
+def normalize_template_name(title: str) -> str:
+    return (
+        (title[:1].upper() + title[1:])
+        .strip()
+        .removeprefix("Template:")
+        .removeprefix("Шаблон:")
+        .removeprefix("T:")
+        .removeprefix("Ш:")
+        .strip()
+    )
 
 
 with bz2.BZ2File(DUMP_PATH, "r") as file:
@@ -168,8 +225,16 @@ with bz2.BZ2File(DUMP_PATH, "r") as file:
             title = matched.group("title")
             wiki_id = matched.group("id")
             ns = matched.group("ns")
+            redirect = matched.group("redirect")
 
-            page_templates = TEMPLATE_RE.findall(text)
+            if redirect and ns == "10" and redirect.startswith("Шаблон:"):
+                redirects[normalize_template_name(title)] = normalize_template_name(
+                    redirect
+                )
+
+            parsed_page = wtp_parse(text)
+            page_templates = parsed_page.templates
+
             if not page_templates:
                 continue
 
@@ -177,13 +242,8 @@ with bz2.BZ2File(DUMP_PATH, "r") as file:
 
             page_id = counter.page_id()
             page_objs.append((page_id, title, wiki_id, namespaces[ns]))
-            for template_str in page_templates:
-                template = WtpTemplate(template_str)
-                template_name = template.normal_name(
-                    rm_namespaces=("Template", "Шаблон", "T", "Ш"),
-                    code="ru",
-                    capitalize=True,
-                )
+            for template in page_templates:
+                template_name = normalize_template_name(template.name)
 
                 template_id = template_pks.get(template_name)
                 if not template_id:
@@ -210,3 +270,12 @@ with bz2.BZ2File(DUMP_PATH, "r") as file:
             node = node + line
 
 save()
+
+for k, v in redirects.items():
+    if template_pks.get(k) and template_pks.get(v):
+        redirect_pks.append((template_pks[v], template_pks[k]))
+
+with engine.connect() as conn:
+    cursor = conn.connection.cursor()
+    cursor.executemany(update_template_redirect, redirect_pks)
+    conn.connection.commit()

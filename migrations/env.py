@@ -6,7 +6,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from config import Config
+from config import config as app_config
 
 from apps.models import Model
 
@@ -24,7 +24,7 @@ logger = logging.getLogger("alembic.env")
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 config.set_main_option(
-    "sqlalchemy.url", Config.SQLALCHEMY_DATABASE_URI.replace("%", "%%")
+    "sqlalchemy.url", app_config.SQLALCHEMY_DATABASE_URI().replace("%", "%%")
 )
 target_metadata = Model.metadata
 

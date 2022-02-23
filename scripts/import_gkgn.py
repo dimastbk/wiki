@@ -6,11 +6,11 @@ import sqlalchemy as sa
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session, declarative_base, relationship, sessionmaker
 
-from config import Config
+from config import config
 
 from apps.gkgn.constants import LevelEnum
 
-engine = sa.create_engine(Config.SQLALCHEMY_DATABASE_URI)
+engine = sa.create_engine(config.SQLALCHEMY_DATABASE_URI())
 LocalSession = sessionmaker(bind=engine)
 session: Session = LocalSession()
 
