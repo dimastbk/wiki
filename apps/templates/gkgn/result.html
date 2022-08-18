@@ -13,23 +13,27 @@
 			</tr>
 		</thead>
 		<tbody>
-			{% for key in result %}
+			{% for item in result %}
 			<tr>
-				<th>{{ key.gkgn_id }}</th>
-				<td>{% if key.level == 'REGION' %}<a href="{{ url_for('gkgn.index_gkgn', region_id=key.id) }}">{{
-						key.name }}</a>{% elif key.level == 'DISTRICT' %}<a
-						href="{{ url_for('gkgn.index_gkgn', region_id=key.region.id, district_id=key.id) }}">{{
-						key.name }}</a>{% else %} {{ key.name }} {% endif %}</td>
-				<td><a href="{{ url_for('gkgn.index_gkgn', type_id=key.type.id) }}">{{
-						key.type.name }}</a></td>
-				<td>{% if key.region %}<a href="{{ url_for('gkgn.index_gkgn', region_id=key.region.id) }}">{{
-						key.region.name }}</a>{% endif %}</td>
-				<td>{% if key.district %}<a
-						href="{{ url_for('gkgn.index_gkgn', region_id=key.region.id, district_id=key.district.id) }}">{{
-						key.district.name }}</a>{% endif %}</td>
-				<td>{% if key.lat and key.lon %}<a target="_blank"
-						href="//tools.wmflabs.org/geohack/geohack.php?language=ru&title={{ key.name }}&params={{ key.lat }}_N_{{ key.lon }}_E_scale:10000_region:RU_type:city">{{
-						'%0.4f'| format(key.lat|float) }}/{{ '%0.4f'| format(key.lon|float) }}</a>{% endif %}</td>
+				<th>
+					<span class="copy_template" style="border-bottom: 1px dashed black;"
+						title="Копировать шаблон в буфер" data-gkgn_id="{{ '{:0>7}'.format(item.gkgn_id) }}" data-name="{{ item.name }}"
+						data-region="{{ item.region.name }}">{{ '{:0>7}'.format(item.gkgn_id) }}</span>
+				</th>
+				<td>{% if item.level == 'REGION' %}<a href="{{ url_for('gkgn.index_gkgn', region_id=item.id) }}">{{
+						item.name }}</a>{% elif item.level == 'DISTRICT' %}<a
+						href="{{ url_for('gkgn.index_gkgn', region_id=item.region.id, district_id=item.id) }}">{{
+						item.name }}</a>{% else %} {{ item.name }} {% endif %}</td>
+				<td><a href="{{ url_for('gkgn.index_gkgn', type_id=item.type.id) }}">{{
+						item.type.name }}</a></td>
+				<td>{% if item.region %}<a href="{{ url_for('gkgn.index_gkgn', region_id=item.region.id) }}">{{
+						item.region.name }}</a>{% endif %}</td>
+				<td>{% if item.district %}<a
+						href="{{ url_for('gkgn.index_gkgn', region_id=item.region.id, district_id=item.district.id) }}">{{
+						item.district.name }}</a>{% endif %}</td>
+				<td>{% if item.lat and item.lon %}<a target="_blank"
+						href="//tools.wmflabs.org/geohack/geohack.php?language=ru&title={{ item.name }}&params={{ item.lat }}_N_{{ item.lon }}_E_scale:10000_region:RU_type:city">{{
+						'%0.4f'| format(item.lat|float) }}/{{ '%0.4f'| format(item.lon|float) }}</a>{% endif %}</td>
 			</tr>
 			{% endfor %}
 		</tbody>

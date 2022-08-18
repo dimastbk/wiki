@@ -36,7 +36,7 @@
 			<select id="type_id" name="type_id" class="form-select" value="{{ form.type_id }}">
 				<option value="" {% if form.type=='' %} selected{% endif %}>&nbsp;</option>
 				{% for type in types %}
-				<option value="{{ type.0 }}" {% if type.0==form.type_id %} selected{% endif %}>{{ type.1
+				<option value="{{ type.id }}" {% if type.id==form.type_id %} selected{% endif %}>{{ type.name
 					}}
 				</option>
 				{% endfor %}
@@ -49,7 +49,7 @@
 			<select id="region_id" name="region_id" class="form-select" value="{{ form.region_id }}">
 				<option value="" {% if form.region_id=='' %} selected{% endif %}>&nbsp;</option>
 				{% for region in regions %}
-				<option value="{{ region.0 }}" {% if region.0==form.region_id %} selected{% endif %}>{{ region.1 }}
+				<option value="{{ region.id }}" {% if region.id==form.region_id %} selected{% endif %}>{{ region.name }}
 				</option>
 				{% endfor %}
 			</select>
@@ -61,7 +61,7 @@
 			<select id="district_id" name="district_id" class="form-select" value="{{ form.district_id }}" {% if not districts %}disabled{% endif %}>
 				<option value="" {% if form.district=='' %} selected{% endif %}>&nbsp;</option>
 				{% for district in districts %}
-				<option value="{{ district.0 }}" {% if district.0==form.district_id %} selected{% endif %}>{{ district.1
+				<option value="{{ district.id }}" {% if district.id==form.district_id %} selected{% endif %}>{{ district.name
 					}}
 				</option>
 				{% endfor %}
@@ -84,7 +84,7 @@
 <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.6.0/jquery.slim.min.js"></script>
 <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/select2/4.0.13/js/select2.full.min.js"></script>
 <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/select2/4.0.13/js/i18n/ru.min.js"></script>
-
+{% raw %}
 <script>
 	$("#type_id").select2({
 		theme: "bootstrap-5",
@@ -98,5 +98,17 @@
 		theme: "bootstrap-5",
 		language: "ru"
 	});
+
+	$(".copy_template").click(
+		function () {
+			var text = '{{ГКГН|' + $(this).data("region") + '||' + $(this).data("gkgn_id") + '|' + $(this).data("name") + '}}';
+			navigator.clipboard.writeText(text).then(function () {
+				console.log('Async: Copying to clipboard was successful!');
+			}, function (err) {
+				console.error('Async: Could not copy text: ', err);
+			})
+		}
+	);
 </script>
+{% endraw %}
 {% endblock %}
