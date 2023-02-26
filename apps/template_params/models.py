@@ -17,7 +17,7 @@ class Namespace(Model):
     pages = cast(list["Page"], relationship("Page", back_populates="namespace"))
 
     def __repr__(self):
-        return "<Namespace {}>".format(self.name)
+        return f"<Namespace {self.name}>"
 
 
 class Project(Model):
@@ -27,7 +27,7 @@ class Project(Model):
     update_at = sa.Column(sa.DateTime)
 
     def __repr__(self):
-        return "<Project {}>".format(self.name)
+        return f"<Project {self.name}>"
 
 
 class BasePage(Model):
@@ -40,13 +40,15 @@ class Template(BasePage):
     __tablename__ = "template"
 
     redirect_id = sa.Column(sa.ForeignKey("template.id"), index=True)
+    # redirect = cast("Template", relationship("Template", back_populates="redirects"))
+    # redirects = cast(list["Template"], relationship("Template", back_populates="redirect"))
 
     params = cast(
         list["PageTemplate"], relationship("PageTemplate", back_populates="template")
     )
 
     def __repr__(self):
-        return "<Template {}>".format(self.title)
+        return f"<Template {self.title}>"
 
 
 class Page(BasePage):
@@ -65,7 +67,7 @@ class Page(BasePage):
     )
 
     def __repr__(self):
-        return "<Page {}>".format(self.title)
+        return f"<Page {self.title}>"
 
 
 class PageTemplate(Model):
@@ -88,7 +90,7 @@ class PageTemplate(Model):
     )
 
     def __repr__(self):
-        return "<PageTemplate {}={}>".format(self.template_id, self.page_id)
+        return f"<PageTemplate {self.template_id}={self.page_id}>"
 
 
 class Param(Model):
@@ -106,4 +108,4 @@ class Param(Model):
     value = sa.Column(sa.String(1000))
 
     def __repr__(self):
-        return "<Param {}={}>".format(self.name, self.value)
+        return f"<Param {self.name}={self.value}>"

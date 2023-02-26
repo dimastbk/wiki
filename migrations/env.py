@@ -1,14 +1,11 @@
-from __future__ import with_statement
-
 import logging
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from config import config as app_config
-
 from apps.models import Model
+from config import config as app_config
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

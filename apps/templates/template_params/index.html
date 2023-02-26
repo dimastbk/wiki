@@ -21,6 +21,16 @@
 		</div>
 	</div>
 	<div class="mb-3 row">
+		<label class="col-sm-2 form-label">Опции:</label>
+		<div class="col-sm-6">
+			<div class="form-check form-check-inline">
+				<input class="form-check-input" type="checkbox" name="with_redirects" id="with_redirects" {% if
+					form.with_redirects %}checked{% endif %}><label class="form-check-label"
+					for="with_redirects">Учитывать редиректы</label>
+			</div>
+		</div>
+	</div>
+	<div class="mb-3 row">
 		<div class="col-sm-2"></div>
 		<div class="col-sm-4">
 			<button type="submit" class="btn btn-outline-dark">Отправить</button>
@@ -28,8 +38,8 @@
 		<div class="col-sm-2">
 			<ul class="pagination">
 				{% for page in pagination %}
-				<li class="page-item {% if page.active %}active{% endif %}{% if page.disabled %}disabled{% endif %}"><a class="page-link"
-						href="{{ page.link }}">{{ page.value }}</a></li>
+				<li class="page-item {% if page.active %}active{% endif %}{% if page.disabled %}disabled{% endif %}"><a
+						class="page-link" href="{{ page.link }}">{{ page.value }}</a></li>
 				{% endfor %}
 			</ul>
 		</div>
@@ -38,9 +48,18 @@
 
 <div class="table-responsive lh-1 text-nowrap" style="font-size: 85%">
 	<table class="table table-sm table-hover caption-top table-bordered">
-		<caption>Показано записей: {{ len }} (всего {{ count }}), время выполнения: __EXECUTION_TIME__ с</caption>
+		<caption>Показано записей: {{ len }} (всего {{ count }}), время выполнения: __EXECUTION_TIME__ с{% if redirects
+			%}<br>
+			Шаблоны: {% for redirect in redirects %}
+			<a href="{{ url_for('template_params.index', template=redirect.title ) }}">{{ redirect.title }}</a> {{ "
+			(основной)" if
+			redirect.redirect_id is none else " (редирект)" }}{{ ", "
+			if not loop.last else "" }}
+			{% endfor %}{% endif %}
+		</caption>
 		<thead>
 			<tr>
+				<th scope="col">Шаблон</th>
 				<th scope="col">Статья</th>
 				{% for param in table_header %}
 				<th><a href="{{ param.link }}">{{ param.name }} {{ param.icon }}</a></th>
@@ -50,6 +69,8 @@
 		<tbody>
 			{% for item in result %}
 			<tr>
+				<th>{{ item.template.title
+					}}</th>
 				<th><a href="https://ru.wikipedia.org/w/index.php?curid={{ item.page.wiki_id }}">{{ item.page.title
 						}}</a></th>
 				{% for param in item.flat_params %}

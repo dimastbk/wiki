@@ -1,14 +1,13 @@
 import csv
 from datetime import datetime
-from typing import List, cast
+from typing import cast
 
 import sqlalchemy as sa
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session, declarative_base, relationship, sessionmaker
 
-from config import config
-
 from apps.gkgn.constants import LevelEnum
+from config import config
 
 engine = sa.create_engine(config.SQLALCHEMY_DATABASE_URI())
 LocalSession = sessionmaker(bind=engine)
@@ -41,7 +40,7 @@ class Type(BaseModel):
 
     name = sa.Column(sa.String(255), comment="Тип")
 
-    objects = cast(List["Object"], relationship("Object", back_populates="type"))
+    objects = cast(list["Object"], relationship("Object", back_populates="type"))
 
 
 class Object(BaseModel):
@@ -94,7 +93,7 @@ session.add_all(Type(name=name) for name in types)
 session.commit()
 
 query = select(Type)
-result: List[Type] = session.execute(query).scalars().all()
+result: list[Type] = session.execute(query).scalars().all()
 types = {t.name: t.id for t in result}
 
 print("Создание регионов")

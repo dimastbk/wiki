@@ -1,4 +1,5 @@
 import bz2
+import html
 import os
 import re
 from datetime import date
@@ -8,10 +9,9 @@ from xml.etree import cElementTree
 import sqlalchemy as sa
 from wikitextparser import parse as wtp_parse
 
-from config import config
-
 from apps.models import Model
 from apps.template_params.models import Namespace, Page, PageTemplate, Param, Template
+from config import config
 
 DUMP_PATH = (
     "/public/dumps/public/ruwiki/latest/ruwiki-latest-pages-meta-current.xml.bz2"
@@ -221,7 +221,7 @@ with bz2.BZ2File(DUMP_PATH, "r") as file:
             if not matched:
                 continue
 
-            text = matched.group("text")
+            text = html.unescape(matched.group("text"))
             title = matched.group("title")
             wiki_id = matched.group("id")
             ns = matched.group("ns")

@@ -2,17 +2,18 @@ from pydantic import BaseSettings
 
 
 class Config(BaseSettings):
-    DB_HOST: str
-    DB_PORT: int = 3306
     DB_USER: str
     DB_PASS: str
+    DB_PORT: int = 3306
+
+    DB_REPLICA_HOST: str
 
     DB_GKGN_HOST: str
     DB_GKGN_NAME: str
 
     @property
     def SQLALCHEMY_BASE_URI(self) -> str:
-        return "mysql://{user}:{password}@{host}:{port}/".format(
+        return "mysql+pymysql://{user}:{password}@{host}:{port}/".format(
             user=self.DB_USER,
             password=self.DB_PASS,
             host=self.DB_GKGN_HOST,

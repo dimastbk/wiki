@@ -14,5 +14,3 @@ test:
 restart:
 	flask db upgrade
 	webservice --backend=kubernetes python3.5 start
-
-

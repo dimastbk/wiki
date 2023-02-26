@@ -6,6 +6,12 @@
 <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/select2/4.0.13/css/select2.min.css" />
 <link rel="stylesheet"
 	href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/select2-bootstrap-5-theme/1.2.0/select2-bootstrap-5-theme.min.css" />
+
+<style>
+	.copy_template {
+		border-bottom: 1px dashed black;
+	}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -58,10 +64,12 @@
 	<div class="mb-3 row">
 		<label for="district_id" class="col-sm-2 form-label">Район:</label>
 		<div class="col-sm-6">
-			<select id="district_id" name="district_id" class="form-select" value="{{ form.district_id }}" {% if not districts %}disabled{% endif %}>
+			<select id="district_id" name="district_id" class="form-select" value="{{ form.district_id }}" {% if not
+				districts %}disabled{% endif %}>
 				<option value="" {% if form.district=='' %} selected{% endif %}>&nbsp;</option>
 				{% for district in districts %}
-				<option value="{{ district.id }}" {% if district.id==form.district_id %} selected{% endif %}>{{ district.name
+				<option value="{{ district.id }}" {% if district.id==form.district_id %} selected{% endif %}>{{
+					district.name
 					}}
 				</option>
 				{% endfor %}
@@ -101,7 +109,7 @@
 
 	$(".copy_template").click(
 		function () {
-			var text = '{{ГКГН|' + $(this).data("region") + '||' + $(this).data("gkgn_id") + '|' + $(this).data("name") + '}}';
+			var text = $(this).data("gkgn");
 			navigator.clipboard.writeText(text).then(function () {
 				console.log('Async: Copying to clipboard was successful!');
 			}, function (err) {

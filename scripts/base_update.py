@@ -155,7 +155,7 @@ class BaseUpdate:
         formated_sections = " • ".join(
             sum([self.format_section(section) for section in sections], [])
         )
-        return "|{}|{}".format(day, formated_sections)
+        return f"|{day}|{formated_sections}"
 
     def make_page_text(self, pages: dict[date, list[Section]]) -> str:
         page_text = "\n\n".join(

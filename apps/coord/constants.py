@@ -1,7 +1,7 @@
 import enum
 
 
-class ExtEnum(enum.Enum):
+class ExtEnum(str, enum.Enum):
     GPX = "gpx"
     KML = "kml"
     GEOJSON = "geojson"

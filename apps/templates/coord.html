@@ -31,7 +31,7 @@
 		<div class="col-sm-6">
 			{% for format in formats %}
 			<div class="form-check form-check-inline">
-				<input class="form-check-input" type="radio" name="ext" id="ext{{ loop.index }}" value="{{ format.ext }}" {% if form.ext==format.ext
+				<input class="form-check-input" type="radio" name="ext" id="ext{{ loop.index }}" value="{{ format.ext.value }}" {% if form.ext==format.ext
 					%}checked{% endif %}>
 				<label class="form-check-label" for="ext{{ loop.index }}">{{ format.label }}</label>
 			</div>{% endfor %}
@@ -52,24 +52,24 @@
 
 {% block extend_css %}
 {% if points %}
-<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet/1.7.1/leaflet.min.css" />
-<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet.markercluster/1.5.0/MarkerCluster.min.css" />
-<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet.markercluster/1.5.0/MarkerCluster.Default.min.css" />
-<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet.fullscreen/2.0.0/Control.FullScreen.min.css" />
+<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet/1.9.3/leaflet.min.css" />
+<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css" />
+<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.min.css" />
+<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet.fullscreen/2.4.0/Control.FullScreen.min.css" />
 {% endif %}
 {% endblock %}
 
 {% block extend_js %}
 {% if points %}
-<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet/1.7.1/leaflet.min.js"></script>
-<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet.markercluster/1.5.0/leaflet.markercluster.min.js"></script>
-<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet.fullscreen/2.0.0/Control.FullScreen.min.js"></script>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet/1.9.3/leaflet.min.js"></script>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet.fullscreen/2.4.0/Control.FullScreen.min.js"></script>
 
 <script type="text/javascript">
 
 	function desc_popup(feature) {
 		return '<div class="text-center"><h5><b>' + feature.properties.name + '</b></h5></div> \
-                      <div class="text-center"><b><a href="https://{{ project }}/wiki/' + feature.properties.title + '">Статья на Вики</a></b></div>'
+                      <div class="text-center"><b><a href="https://{{ project }}/wiki/' + feature.properties.title + '" target="_blank">Статья на Вики</a></b></div>'
 	}
 
 	var markerArray = [];

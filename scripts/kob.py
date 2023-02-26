@@ -43,7 +43,7 @@ class KOBUpdate(BaseUpdate):
         formated_sections = "".join(
             [self.format_section(section) for section in sections]
         )
-        return "|{}|{}".format(day, formated_sections)
+        return f"|{day}|{formated_sections}"
 
 
 if __name__ == "__main__":

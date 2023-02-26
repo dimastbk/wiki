@@ -1,77 +1,58 @@
-import MySQLdb
-from flask import Blueprint
-from flask import current_app as app
-from flask import render_template, request
+import pymysql
+from flask import Blueprint, render_template, request
 from flask.wrappers import Response
+from flask_pydantic import validate
 from slugify import slugify
 from werkzeug.datastructures import Headers
 
+from config import config
+
 from .constants import ExtEnum
+from .serializers import FormatSettings, Point, Query
 from .track_file import makegpx, makejson, makekml
 
 coord_bp = Blueprint("coord", __name__)
 
 FORMATS = (
-    {"ext": ExtEnum.GPX.value, "label": "GPX", "active": True},
-    {"ext": ExtEnum.KML.value, "label": "KML"},
-    {"ext": ExtEnum.GEOJSON.value, "label": "GeoJSON"},
-    {"ext": ExtEnum.MAP.value, "label": "На карте"},
+    {"ext": ExtEnum.GPX, "label": "GPX"},
+    {"ext": ExtEnum.KML, "label": "KML"},
+    {"ext": ExtEnum.GEOJSON, "label": "GeoJSON"},
+    {"ext": ExtEnum.MAP, "label": "На карте"},
 )
 
+FORMAT_SETTINGS = {
+    ExtEnum.KML: FormatSettings(makekml, "kml", "application/vnd.google-earth.kml+xml"),
+    ExtEnum.GPX: FormatSettings(makegpx, "gpx", "application/gpx+xml"),
+    ExtEnum.GEOJSON: FormatSettings(makejson, "geojson", "application/vnd.geo+json"),
+}
 
-def get_project(project):
+
+def get_project(project: str):
     lang, pr = project.split("wiki")
     if not pr:
         pr = "pedia"
-    return "{}.wiki{}.org".format(lang, pr)
+    return f"{lang}.wiki{pr}.org"
 
 
 @coord_bp.route("/")
+@validate(query=Query)
 def index_coord():
+    query_params: Query = request.query_params
 
-    form = {}
+    if not query_params.category:
+        return render_template(
+            "coord.html", form=query_params.dict(), formats=FORMATS, regions={}
+        )
 
-    formats = {
-        ExtEnum.KML.value: {
-            "func": makekml,
-            "ext": "kml",
-            "ct": "application/vnd.google-earth.kml+xml",
-        },
-        ExtEnum.GPX.value: {
-            "func": makegpx,
-            "ext": "gpx",
-            "ct": "application/gpx+xml",
-        },
-        ExtEnum.GEOJSON.value: {
-            "func": makejson,
-            "ext": "geojson",
-            "ct": "application/vnd.geo+json",
-        },
-    }
-
-    wiki = request.values.get("wiki", "ruwiki")
-    category = request.values.get("category", "")
-    not_primary = request.values.get("not_primary")
-    ext = request.values.get("ext", "map")
-
-    form["wiki"] = wiki
-    form["category"] = category
-    form["not_primary"] = not_primary
-    form["ext"] = ext
-
-    if not (category and ext in ("map", "kml", "gpx", "geojson")):
-        return render_template("coord.html", form=form, formats=FORMATS, regions={})
-
-    connection: MySQLdb.Connection = MySQLdb.Connect(
-        host=app.config["DB_HOST"],
-        port=app.config["DB_PORT"],
-        user=app.config["DB_USER"],
-        password=app.config["DB_PASS"],
-        database="{}_p".format(wiki),
+    connection = pymysql.Connect(
+        host=config.DB_REPLICA_HOST,
+        port=config.DB_PORT,
+        user=config.DB_USER,
+        password=config.DB_PASS,
+        database=f"{query_params.wiki}_p",
     )
 
     with connection:
-        cursor: MySQLdb.cursors.Cursor
         with connection.cursor() as cursor:
             sql = """SELECT `page`.`page_title`,
                             `geo_tags`.`gt_name`,
@@ -85,36 +66,41 @@ def index_coord():
                          FROM `categorylinks`
                          WHERE `cl_to` = %s)
                       AND `page_namespace` = 0
+                      AND `gt_globe` = "earth"
                       {};
                       """.format(
-                "" if not_primary else "AND `gt_primary` = 1"
+                "" if query_params.not_primary else "AND `gt_primary` = 1"
             )
-            cursor.execute(sql, (category.replace(" ", "_"),))
-            points = cursor.fetchall()
+            cursor.execute(sql, (query_params.category.replace(" ", "_"),))
+            points = [Point(*el) for el in cursor.fetchall()]
 
-    if ext == ExtEnum.MAP.value or not points:
+    if query_params.ext == ExtEnum.MAP or not points:
         return render_template(
             "coord.html",
-            form=form,
+            form=query_params.dict(),
             formats=FORMATS,
-            points=makejson(points, category),
-            project=get_project(wiki),
+            points=makejson(points, query_params.category),
+            project=get_project(query_params.wiki),
         )
 
-    elif ext in formats.keys():
-        filename = slugify(category)
+    elif query_params.ext in FORMAT_SETTINGS.keys():
+        filename = slugify(query_params.category)
         headers = Headers()
         headers.add(
             "Content-Disposition",
             "attachment",
-            filename="{}.{}".format(filename, formats[ext]["ext"]),
+            filename=f"{filename}.{FORMAT_SETTINGS[query_params.ext].ext}",
         )
         response = Response(
-            formats[ext]["func"](points, category, project=get_project(wiki)),
+            FORMAT_SETTINGS[query_params.ext].func(
+                points, query_params.category, get_project(query_params.wiki)
+            ),
             headers=headers,
-            content_type=formats[ext]["ct"],
+            content_type=FORMAT_SETTINGS[query_params.ext].content_type,
         )
     else:
-        response = render_template("coord.html", form=form, formats=FORMATS)
+        response = render_template(
+            "coord.html", form=query_params.dict(), formats=FORMATS
+        )
 
     return response

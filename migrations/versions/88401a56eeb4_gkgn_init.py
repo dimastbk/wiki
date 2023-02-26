@@ -1,7 +1,7 @@
 """gkgn init
 
 Revision ID: 88401a56eeb4
-Revises: 
+Revises:
 Create Date: 2019-11-08 12:53:38.429519
 
 """

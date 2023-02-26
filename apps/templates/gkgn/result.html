@@ -16,9 +16,9 @@
 			{% for item in result %}
 			<tr>
 				<th>
-					<span class="copy_template" style="border-bottom: 1px dashed black;"
-						title="Копировать шаблон в буфер" data-gkgn_id="{{ '{:0>7}'.format(item.gkgn_id) }}" data-name="{{ item.name }}"
-						data-region="{{ item.region.name }}">{{ '{:0>7}'.format(item.gkgn_id) }}</span>
+					<span class="copy_template" title="Копировать шаблон в буфер"
+						data-gkgn="{{ '{{ГКГН|' }}{{ item.region.name }}||{{ '{:0>7}'.format(item.gkgn_id) }}|{{ item.name }}{{ '}}' }}">{{
+						'{:0>7}'.format(item.gkgn_id) }}</span>
 				</th>
 				<td>{% if item.level == 'REGION' %}<a href="{{ url_for('gkgn.index_gkgn', region_id=item.id) }}">{{
 						item.name }}</a>{% elif item.level == 'DISTRICT' %}<a

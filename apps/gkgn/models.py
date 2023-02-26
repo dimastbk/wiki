@@ -25,7 +25,7 @@ class Settlement(Model):
     oktmo_up = sa.Column(sa.String(11))
 
     def __repr__(self):
-        return "<Settlement {}>".format(self.name)
+        return f"<Settlement {self.name}>"
 
 
 class ATE(Model):
@@ -42,7 +42,7 @@ class ATE(Model):
     oktmo_up = sa.Column(sa.String(11))
 
     def __repr__(self):
-        return "<ATE {}>".format(self.name)
+        return f"<ATE {self.name}>"
 
 
 class Type(BaseModel):
