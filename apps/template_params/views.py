@@ -142,7 +142,7 @@ def index():
     all_templates = []
 
     with session_for_db(query_params.project) as session:
-        query = select(Template).where(Template.title == form.template)
+        query = select(Template).where(Template.title == func.binary(form.template))
         template = session.scalars(query).one_or_none()
 
         if not template:
