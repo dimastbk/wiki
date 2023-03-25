@@ -13,7 +13,7 @@ class Config(BaseSettings):
 
     @property
     def SQLALCHEMY_BASE_URI(self) -> str:
-        return "mysql+pymysql://{user}:{password}@{host}:{port}/".format(
+        return "mysql://{user}:{password}@{host}:{port}/".format(
             user=self.DB_USER,
             password=self.DB_PASS,
             host=self.DB_GKGN_HOST,

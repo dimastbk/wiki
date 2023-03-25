@@ -1,4 +1,4 @@
-import pymysql
+import MySQLdb
 from flask import Blueprint, render_template, request
 from flask.wrappers import Response
 from flask_pydantic import validate
@@ -44,7 +44,7 @@ def index_coord():
             "coord.html", form=query_params.dict(), formats=FORMATS, regions={}
         )
 
-    connection = pymysql.Connect(
+    connection: MySQLdb.Connection = MySQLdb.Connect(
         host=config.DB_REPLICA_HOST,
         port=config.DB_PORT,
         user=config.DB_USER,
@@ -53,6 +53,7 @@ def index_coord():
     )
 
     with connection:
+        cursor: MySQLdb.cursors.Cursor
         with connection.cursor() as cursor:
             sql = """SELECT `page`.`page_title`,
                             `geo_tags`.`gt_name`,

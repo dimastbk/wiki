@@ -158,7 +158,7 @@ def index():
 
         if form.with_redirects:
             query = (
-                select(Template)
+                select(Template.id)
                 .where(
                     or_(
                         Template.id == template.redirect_id,
@@ -168,8 +168,7 @@ def index():
                 .order_by(Template.redirect_id)
                 .distinct()
             )
-            all_templates = session.scalars(query).all()
-            all_templates_ids = [t.id for t in all_templates]
+            all_templates_ids = session.scalars(query).all()
         else:
             all_templates_ids = [template.id]
 
@@ -186,7 +185,7 @@ def index():
                 .where(PageTemplate.template_id.in_(all_templates_ids))
                 .order_by(Param.name)
             )
-            all_params: list[str] = session.scalars(query).all()
+            all_params = session.scalars(query).all()
 
             cache.set(
                 make_cache_key("template_params", template.id, form.with_redirects),
