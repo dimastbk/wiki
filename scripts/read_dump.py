@@ -105,6 +105,8 @@ with bz2.BZ2File(DUMP_PATH, "r") as file:
         elif line.strip() == "</namespaces>":
             with engine.connect() as conn:
                 conn.execute(Namespace.__table__.insert(), objs)
+                conn.commit()
+
             print("Namespaces created...")
             break
 
@@ -144,6 +146,7 @@ def save():
         conn.execute(Template.__table__.insert(), template_objs)
         conn.execute(PageTemplate.__table__.insert(), page_template_objs)
         conn.execute(Param.__table__.insert(), param_objs)
+        conn.commit()
 
     page_objs.clear()
     template_objs.clear()
