@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import bz2
 import html
 import os
@@ -117,47 +119,6 @@ DUMP_RE = re.compile(
     re.DOTALL,
 )
 
-insert_page = str(
-    Page.__table__.insert()
-    .values(
-        id=sa.bindparam("id"),
-        title=sa.bindparam("title"),
-        wiki_id=sa.bindparam("wiki_id"),
-        namespace_id=sa.bindparam("namespace_id"),
-    )
-    .compile(dialect=engine.dialect)
-)
-
-insert_template = str(
-    Template.__table__.insert()
-    .values(
-        id=sa.bindparam("id"),
-        title=sa.bindparam("title"),
-    )
-    .compile(dialect=engine.dialect)
-)
-
-insert_page_temlplate = str(
-    PageTemplate.__table__.insert()
-    .values(
-        id=sa.bindparam("id"),
-        template_id=sa.bindparam("template_id"),
-        page_id=sa.bindparam("page_id"),
-    )
-    .compile(dialect=engine.dialect)
-)
-
-insert_param = str(
-    Param.__table__.insert()
-    .values(
-        id=sa.bindparam("id"),
-        page_template_id=sa.bindparam("page_template_id"),
-        name=sa.bindparam("name"),
-        value=sa.bindparam("value"),
-    )
-    .compile(dialect=engine.dialect)
-)
-
 update_template_redirect = str(
     Template.__table__.update()
     .where(Template.__table__.c.id == sa.bindparam("id"))
@@ -166,10 +127,10 @@ update_template_redirect = str(
 )
 
 template_pks: dict[str, int] = {}
-template_objs: list[tuple[int, str]] = []
-page_objs: list[tuple[int, str, str, int]] = []
-page_template_objs: list[tuple[int, int, int]] = []
-param_objs: list[tuple[int, int, str, str]] = []
+template_objs: list[dict[str, str | int]] = []
+page_objs: list[dict[str, str | int]] = []
+page_template_objs: list[dict[str, int]] = []
+param_objs: list[dict[str, str | int]] = []
 redirects: dict[str, str] = {}
 redirect_pks: list[tuple[int, int]] = []
 
@@ -179,12 +140,10 @@ def save():
     print(f"{c} ({e})")
 
     with engine.connect() as conn:
-        cursor = conn.connection.cursor()
-        cursor.executemany(insert_page, page_objs)
-        cursor.executemany(insert_template, template_objs)
-        cursor.executemany(insert_page_temlplate, page_template_objs)
-        cursor.executemany(insert_param, param_objs)
-        conn.connection.commit()
+        conn.execute(Page.__table__.insert(), page_objs)
+        conn.execute(Template.__table__.insert(), template_objs)
+        conn.execute(PageTemplate.__table__.insert(), page_template_objs)
+        conn.execute(Param.__table__.insert(), param_objs)
 
     page_objs.clear()
     template_objs.clear()
@@ -241,28 +200,41 @@ with bz2.BZ2File(DUMP_PATH, "r") as file:
             c += 1
 
             page_id = counter.page_id()
-            page_objs.append((page_id, title, wiki_id, namespaces[ns]))
+            page_objs.append(
+                {
+                    "id": page_id,
+                    "title": title,
+                    "wiki_id": wiki_id,
+                    "namespace_id": namespaces[ns],
+                }
+            )
             for template in page_templates:
                 template_name = normalize_template_name(template.name)
 
                 template_id = template_pks.get(template_name)
                 if not template_id:
                     template_id = counter.template_id()
-                    template_objs.append((template_id, template_name))
+                    template_objs.append({"id": template_id, "title": template_name})
                     template_pks[template_name] = template_id
 
                 page_template_id = counter.page_template_id()
-                page_template_objs.append((page_template_id, template_id, page_id))
+                page_template_objs.append(
+                    {
+                        "id": page_template_id,
+                        "template_id": template_id,
+                        "page_id": page_id,
+                    }
+                )
 
                 for param in template.arguments:
                     param_name = param.name.strip()
                     param_objs.append(
-                        (
-                            counter.param_id(),
-                            page_template_id,
-                            param_name if param_name else "__EMPTY__",
-                            param.value.strip(),
-                        )
+                        {
+                            "id": counter.param_id(),
+                            "page_template_id": page_template_id,
+                            "name": param_name if param_name else "__EMPTY__",
+                            "value": param.value.strip(),
+                        }
                     )
             if c % 5000 == 0:
                 save()
