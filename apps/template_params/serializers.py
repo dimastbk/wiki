@@ -1,6 +1,12 @@
+from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, root_validator, validator
+
+
+class FormatEnum(str, Enum):
+    CSV = "csv"
+    HTML = "html"
 
 
 class Query(BaseModel):
@@ -10,6 +16,7 @@ class Query(BaseModel):
     page: int = Field(1, ge=1)
     limit: int = Field(50, ge=1, le=500)
     with_redirects: bool = False
+    format: FormatEnum = FormatEnum.HTML
 
     @validator("project")
     def format_project(cls, v: str) -> str:
@@ -22,3 +29,9 @@ class Query(BaseModel):
     @validator("order_by", pre=True)
     def parse_order_by(cls, v: Any) -> list[str]:
         return [x.replace("%2C", ",") for x in str(v).split(",")]
+
+    @root_validator
+    def update_limit(cls, values):
+        if values["format"] == FormatEnum.CSV:
+            values["limit"] = 5000
+        return values

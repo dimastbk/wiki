@@ -21,19 +21,10 @@
 		</div>
 	</div>
 	<div class="mb-3 row">
-		<label class="col-sm-2 form-label">Опции:</label>
-		<div class="col-sm-6">
-			<div class="form-check form-check-inline">
-				<input class="form-check-input" type="checkbox" name="with_redirects" id="with_redirects" {% if
-					form.with_redirects %}checked{% endif %}><label class="form-check-label"
-					for="with_redirects">Учитывать редиректы</label>
-			</div>
-		</div>
-	</div>
-	<div class="mb-3 row">
 		<div class="col-sm-2"></div>
 		<div class="col-sm-4">
-			<button type="submit" class="btn btn-outline-dark">Отправить</button>
+			<button type="submit" name="format" value="html" class="btn btn-outline-dark">Поиск</button>
+			<button type="submit" name="format" value="csv" class="btn btn-outline-dark">Скачать CSV</button>
 		</div>
 		<div class="col-sm-2">
 			<ul class="pagination">
@@ -74,8 +65,8 @@
 				<th><a href="https://ru.wikipedia.org/w/index.php?curid={{ item.page.wiki_id }}">{{ item.page.title
 						}}</a></th>
 				{% for param in item.flat_params %}
-				{% if param == '__NONE__' %}<td></td>{% elif param %}<td>{{ param }}</td>{% else %}<td
-					class="table-info"></td>
+				{% if param == '_X_' %}<td></td>{% elif param %}<td>{{ param }}</td>{% else %}<td class="table-info">
+				</td>
 				{% endif %}
 				{% endfor %}
 			</tr>

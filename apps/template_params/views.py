@@ -1,17 +1,21 @@
+import csv
 import json
 from dataclasses import dataclass
 from datetime import timedelta
+from io import StringIO
 from typing import Any, Optional
 
-from flask import Blueprint, render_template, request, url_for
+from flask import Blueprint, Response, render_template, request, url_for
 from flask_pydantic import validate
+from slugify import slugify
 from sqlalchemy import and_, func, or_, select
+from werkzeug.datastructures import Headers
 
 from apps.cache import cache, make_cache_key
 from apps.db import session_for_db
 
 from .models import Namespace, Page, PageTemplate, Param, Template
-from .serializers import Query
+from .serializers import FormatEnum, Query
 
 template_params_bp = Blueprint("template_params", __name__)
 
@@ -31,6 +35,7 @@ class Form:
     limit: int
     page: int
     with_redirects: bool
+    format: FormatEnum
     page_count: int = 1
 
 
@@ -176,7 +181,7 @@ def index():
             make_cache_key("template_params", template.id, form.with_redirects)
         )
         if params_cache:
-            all_params = json.loads(params_cache)
+            all_params: list[str] = json.loads(params_cache)
         else:
             query = (
                 select(Param.name)
@@ -185,7 +190,7 @@ def index():
                 .where(PageTemplate.template_id.in_(all_templates_ids))
                 .order_by(Param.name)
             )
-            all_params = session.scalars(query).all()
+            all_params: list[str] = session.scalars(query).all()
 
             cache.set(
                 make_cache_key("template_params", template.id, form.with_redirects),
@@ -235,7 +240,7 @@ def index():
             item_params = {p.name: p.value for p in item.params}
             item.flat_params = []
             for param in all_params:
-                item.flat_params.append(item_params.get(param, "__NONE__"))
+                item.flat_params.append(item_params.get(param, "_X_"))
 
         count_cache: Optional[bytes] = cache.get(
             make_cache_key("count", template.id, form.with_redirects)
@@ -258,13 +263,26 @@ def index():
 
         form.page_count = int(count) // form.limit + 1
 
-    return render_template(
-        "template_params/index.html",
-        table_header=make_headers(form, all_params),
-        pagination=make_pagination(form),
-        result=result,
-        len=len(result),
-        count=count,
-        form=form,
-        redirects=all_templates,
-    )
+    if form.format == FormatEnum.HTML:
+        return render_template(
+            "template_params/index.html",
+            table_header=make_headers(form, all_params),
+            pagination=make_pagination(form),
+            result=result,
+            len=len(result),
+            count=count,
+            form=form,
+            redirects=all_templates,
+        )
+    else:
+        filename = slugify(form.template)
+        headers = Headers()
+        headers.add("Content-Disposition", "attachment", filename=f"{filename}.csv")
+
+        io = StringIO()
+
+        writer = csv.writer(io)
+        writer.writerow(all_params)
+        writer.writerows([item.flat_params for item in result])
+
+        return Response(io.getvalue(), headers=headers, content_type="text/csv")
