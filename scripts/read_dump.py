@@ -9,6 +9,7 @@ from timeit import default_timer
 from xml.etree import cElementTree
 
 import sqlalchemy as sa
+from markupsafe import _strip_comments_re
 from wikitextparser import parse as wtp_parse
 
 from apps.models import Model
@@ -60,9 +61,7 @@ update_date = date(
     int(project_search.group(3)),
     int(project_search.group(4)),
 )
-
 engine = sa.create_engine(config.SQLALCHEMY_DATABASE_URI(project_search.group(1)))
-
 
 # Очищаем все таблицы (код для MySQL)
 Model.metadata.drop_all(
@@ -156,7 +155,13 @@ def save():
     print(default_timer() - t)
 
 
+def normalize_name(title: str) -> str:
+    title = _strip_comments_re.sub("", title)
+    return title.strip()[:191]
+
+
 def normalize_template_name(title: str) -> str:
+    title = _strip_comments_re.sub("", title)
     return (
         (title[:1].upper() + title[1:])
         .strip()
@@ -164,7 +169,7 @@ def normalize_template_name(title: str) -> str:
         .removeprefix("Шаблон:")
         .removeprefix("T:")
         .removeprefix("Ш:")
-        .strip()
+        .strip()[:191]
     )
 
 
@@ -206,13 +211,15 @@ with bz2.BZ2File(DUMP_PATH, "r") as file:
             page_objs.append(
                 {
                     "id": page_id,
-                    "title": title,
+                    "title": title[:191],
                     "wiki_id": wiki_id,
                     "namespace_id": namespaces[ns],
                 }
             )
             for template in page_templates:
                 template_name = normalize_template_name(template.name)
+                if not template_name:
+                    continue
 
                 template_id = template_pks.get(template_name)
                 if not template_id:
@@ -233,10 +240,11 @@ with bz2.BZ2File(DUMP_PATH, "r") as file:
                     param_name = param.name.strip()
                     param_objs.append(
                         {
-                            "id": counter.param_id(),
                             "page_template_id": page_template_id,
-                            "name": param_name if param_name else "__EMPTY__",
-                            "value": param.value.strip(),
+                            "name": normalize_name(param_name)
+                            if param_name
+                            else "__EMPTY__",
+                            "value": param.value.strip()[:1000],
                         }
                     )
             if c % 5000 == 0:
