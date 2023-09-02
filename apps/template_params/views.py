@@ -130,7 +130,7 @@ def make_headers(form: Form, all_params: list) -> list:
                 "link": url_for(
                     "template_params.index",
                     template=form.template,
-                    order_by=",".join(x.replace(",", "%2C") for x in order_by_list),
+                    order_by=order_by_list,
                     page=form.page,
                 ),
                 "icon": order_icon,
@@ -282,7 +282,7 @@ def index():
         io = StringIO()
 
         writer = csv.writer(io)
-        writer.writerow(all_params)
-        writer.writerows([item.flat_params for item in result])
+        writer.writerow(["Статья"] + all_params)
+        writer.writerows([[item.page.title] + item.flat_params for item in result])
 
         return Response(io.getvalue(), headers=headers, content_type="text/csv")

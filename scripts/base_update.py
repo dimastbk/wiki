@@ -164,10 +164,7 @@ class BaseUpdate:
         return self.result_page_template.format(page_text)
 
     def sort_pages(self, pages: dict[date, list[Section]]):
-        pages = {
-            k: v
-            for k, v in sorted(pages.items(), key=lambda item: item[0], reverse=True)
-        }
+        pages = dict(sorted(pages.items(), key=lambda item: item[0], reverse=True))
         return pages
 
     def save_result_page(self, result_page_text: str):
